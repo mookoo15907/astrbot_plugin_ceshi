@@ -177,64 +177,126 @@ class MyPlugin(Star):
             f"{user_name} 的背包：\n好感度：{info['favor']}\n玻璃珠：{info['marbles']}"
         )
 
-        # ---- 新增指令：占卜 ----
+    # ---- 新增指令：占卜（每日一次）----
     @filter.command("占卜")
     async def divination(self, event: AstrMessageEvent):
-        """占卜：随机一张大阿卡那（正/逆），按牌面影响玻璃珠与好感度。"""
+        """
+        每日仅可占卜一次：
+        - 扣 20 玻璃珠占卜费（仅在今日首次占卜时扣）
+        - 抽 22 大阿卡那（正/逆）
+        - 展示牌面等级（SSS/SS/S/B/C/D/F）与中文形容词
+        - 好牌给祝福、坏牌给安慰；玻璃珠变动受牌面影响（±266 封顶）
+        - SSS 牌 10% 中奖 +999 玻璃珠
+        - 好感度 +0~50，与牌面无关
+        """
         user_name = event.get_sender_name()
         user_id = self._get_user_id(event)
         user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
 
-        # 扣除占卜费用
+        today = datetime.now().date().isoformat()
+        if user.get("last_divine") == today:
+            # 今日已占卜，直接提示冷却；不扣费不改数值
+            yield event.plain_result(
+                f"🔒 {user_name}，今天已经占卜过啦～明天再来试试命运之轮吧！\n"
+                f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+            )
+            return
+
+        # -- 首次占卜：扣占卜费 --
         fee = 20
         user["marbles"] = user.get("marbles", 0) - fee
 
-        # 随机牌面
+        # -- 随机牌面 --
         cards = self._get_arcana_data()
         card_name = random.choice(list(cards.keys()))
         upright = random.choice([True, False])
         orient = "upright" if upright else "reversed"
-        m = cards[card_name][orient]
+        m = cards[card_name][orient]  # dict: core/type/keywords/interp
         orient_cn = "正位" if upright else "逆位"
 
-        # 根据评级决定玻璃珠变化
-        rating = m["type"]
+        # -- 牌面等级与玻璃珠变化 --
+        rating = m["type"]  # SSS/SS/S/B/C/D/F
         ranges = self._get_marble_range()
         rmin, rmax = ranges[rating]
         marble_delta = random.randint(rmin, rmax)
-        marble_delta = max(-266, min(266, marble_delta))
+        marble_delta = max(-266, min(266, marble_delta))  # clip 到 ±266
 
-        # 好感度独立增长
+        # -- 好感度独立增长 --
         favor_inc = random.randint(0, 50)
 
-        # 特别棒（SSS）牌额外奖励
+        # -- 特别棒（SSS）10% 中奖 +999 --
         bonus = 0
         bonus_text = ""
         if rating == "SSS" and random.random() < 0.10:
             bonus = 999
             bonus_text = "\n🎉 中奖时刻！群星垂青，额外获得 **999** 颗玻璃珠！"
 
-        # 更新数据
-        user["favor"] += favor_inc
-        user["marbles"] += marble_delta + bonus
+        # -- 祝福/安慰语 --
+        bucket = self._rating_bucket(rating)  # 'good' | 'swing' | 'bad'
+        mood_line = self._bless_or_comfort(bucket)
+
+        # -- 更新数据并标记今日已占卜 --
+        user["favor"] = user.get("favor", 0) + favor_inc
+        user["marbles"] = user.get("marbles", 0) + marble_delta + bonus
+        user["last_divine"] = today
         self._save_state()
 
-        # 输出文本
-        rating_word = self._get_rating_word()[rating]
-        keywords = "、".join(m["keywords"])
-        def fmt_signed(x): return f"+{x}" if x >= 0 else f"{x}"
+        # -- 展示 --
+        def fmt_signed(n: int) -> str:
+            return f"+{n}" if n >= 0 else f"{n}"
+
+        rating_word = self._get_rating_word()[rating]  # 例如 “特别棒的”
+        keywords = "、".join(m["keywords"][:6])
 
         reply = (
             f"🔮 我收取了 **{fee}** 枚玻璃珠作为占卜费用……\n"
             f"✨ 本次是 **{card_name}·{orient_cn}**\n"
+            f"等级：**{rating}（{rating_word}）**\n"
             f"核心：**{m['core']}**｜其它：{keywords}\n"
             f"🔎 解析：{m['interp']}\n"
-            f"这是一张**{rating_word}**牌呢。\n"
+            f"{mood_line}\n"
             f"💗 小碎好感度 {fmt_signed(favor_inc)}，"
             f"🫧 玻璃珠 {fmt_signed(marble_delta + bonus)}{bonus_text}\n"
             f"📦 当前背包｜好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
         )
         yield event.plain_result(reply)
+
+        def _rating_bucket(self, rating: str) -> str:
+        """
+        把七档等级映射为三种语气：
+        - good: SSS/SS/S
+        - swing: B（有波动）
+        - bad: C/D/F
+        """
+        if rating in ("SSS", "SS", "S"):
+            return "good"
+        if rating == "B":
+            return "swing"
+        return "bad"
+
+    def _bless_or_comfort(self, bucket: str) -> str:
+        """根据档位给祝福/安慰/建议文案（随机取一句）"""
+        if bucket == "good":
+            pool = [
+                "🕊️ 祝福送达：顺风顺水、步步开花！",
+                "🌟 愿你保持清澈与专注，好运与成果相互奔赴。",
+                "🚀 保持节奏与信心，今天的舞台灯正亮着。",
+                "💫 把灵感落地成行动，宇宙会给出回应。",
+            ]
+        elif bucket == "swing":
+            pool = [
+                "🌗 提醒：形势有波动，收束变量、稳步推进。",
+                "🧭 先把小目标拿下，趋势自然会转向你。",
+                "⚖️ 管住节奏与边界，少量正确比大量盲冲更强。",
+            ]
+        else:  # bad
+            pool = [
+                "🫧 别怕，今天先把自己安顿好，路会在脚下重新出现。",
+                "🌧️ 暂避锋芒也算前进，先修复能量再出发。",
+                "🛡️ 把风险写出来就降级一半，慢慢来，一切都会过去。",
+            ]
+        return random.choice(pool)
+
 
 
     # ====== 以下是占卜数据的延迟加载方法们 ======
