@@ -697,14 +697,14 @@ async def extra_sign_in(self, event: AstrMessageEvent):
 # ==================================================================
 
 # （放在类里，替换你现有的 _try_drop_egg 函数）
-async def _try_drop_egg(self, event: AstrMessageEvent, is_interaction: bool | None = None) -> MessageEventResult | None:
+    async def _try_drop_egg(self, event: AstrMessageEvent, is_interaction: bool | None = None) -> MessageEventResult | None:
     """
     固定 10% 概率掉落（不再依赖全局消息入口）。
     参数 is_interaction 保留做兼容，实际不再使用。
     """
-    user_name = event.get_sender_name()
-    user_id = self._get_user_id(event)
-    user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+        user_name = event.get_sender_name()
+        user_id = self._get_user_id(event)
+        user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
 
     # ── 初始化彩蛋/成就存档 ─────────────────────────────────────────────
     store = self._state.setdefault("eggs", {})
