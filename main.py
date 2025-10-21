@@ -68,18 +68,6 @@ class MyPlugin(Star):
             return "evening"
         return "midnight"  # 23~4
 
-    # ==== 内部：初始化彩蛋系统结构（必须有） ====
-    def _ensure_egg_state(self):
-        """确保彩蛋系统的状态结构存在"""
-        if "egg_system" not in self._state:
-            self._state["egg_system"] = {}
-        if "users" not in self._state:
-            self._state["users"] = {}
-        es = self._state["egg_system"]
-        # 彩蛋数量配置
-        es.setdefault("catalog", {"N": 25, "R": 10, "UR": 5, "SP": 10})
-        # “最难超稀有彩蛋”的标记（用于0.5%掉落判定）
-        es.setdefault("mythic_id", {"cat": "UR", "id": 5})
 
     # ---- 已有指令：小碎（保留随机多语气） ----
     @filter.command("小碎")
@@ -612,25 +600,23 @@ async def extra_sign_in(self, event: AstrMessageEvent):
     yield event.plain_result(reply)
 
 
-# ==== 彩蛋系统（精简版：每种稀有度只预置 3 个，便于你后续扩充） ======================
-# 放在 class MyPlugin(Star): 内，与 __init__ 同级缩进
-# 说明：
-# - 普通消息掉落 5%，四个“日常互动”（签到/我还要签到/占卜/投喂）每次 15%
-# - 特别彩蛋固定 10% 机会；“最难超稀有”全局 0.5%（UR-#3）
-# - 不重复掉落；成就/图鉴接口可复用你之前的（如有）
-# - 这里只给每个稀有度 3 条示例，剩余你可按格式继续往后补：idx 从 4 起
+    # ==== 彩蛋系统（精简版） =====================================================
 
-# === 1) 保底：状态初始化 ===
+    def _ensure_egg_state(self):
+        """初始化彩蛋系统的状态结构"""
+        if "egg_system" not in self._state:
+            self._state["egg_system"] = {}
+        if "users" not in self._state:
+            self._state["users"] = {}
+        es = self._state["egg_system"]
+        es.setdefault("catalog", {"N": 25, "R": 10, "UR": 5, "SP": 10})
+        es.setdefault("mythic_id", {"cat": "UR", "id": 3})
 
-
-
-    # === 2) 工具：正负号格式化 ===
     def _fmt_signed(self, n: int) -> str:
         return f"+{n}" if n >= 0 else f"{n}"
 
-    # === 3) 逻辑式彩蛋池（每类只给 3 个示例，奖励与内容强关联） ===
-    # 返回 (标题, 内容, favor_inc, marble_inc)
     def _egg_text(self, cat: str, idx: int):
+        """返回 (标题, 内容, 好感增量, 玻璃珠增量)"""
         normal_eggs = [
             ("【甜甜圈店的奇遇】",
              "和小碎一起吃到草莓燕麦脆珠甜甜圈，糖霜里竟然嵌着小小玻璃珠！",
@@ -641,7 +627,6 @@ async def extra_sign_in(self, event: AstrMessageEvent):
             ("【午后的柠檬水】",
              "冰块叮当作响，小碎喝到杯底，发现有颗珠子在眨眼。",
              8, 35),
-            # 你可以从这里开始继续添加：idx = 4, 5, ...
         ]
 
         rare_eggs = [
@@ -654,7 +639,6 @@ async def extra_sign_in(self, event: AstrMessageEvent):
             ("【夜市的奖券】",
              "小碎抽中特等奖——一瓶叮当作响的玻璃珠！",
              15, 120),
-            # 从这里继续补：idx = 4, ...
         ]
 
         ur_eggs = [
@@ -667,92 +651,58 @@ async def extra_sign_in(self, event: AstrMessageEvent):
             ("【群星玻璃匣】",
              "（最难彩蛋）匣子开启，群星一齐闪烁——玻璃珠飞舞成环。",
              300, 999),
-            # 从这里继续补：idx = 4, 5（注意 catalog 里 UR=5）
         ]
 
         sp_eggs = [
-            # 星露谷（示例 3/6）
             ("【星露谷·金星南瓜派】",
              "烤盘里竟多出几颗闪亮的小珠子，小碎把最大那颗分给你。",
              25, 150),
-            ("【星露谷·幸运午餐】",
-             "一口下去就觉得今天很顺，小碎把‘好运贴纸’贴你额头上。",
-             20, 100),
-            ("【星露谷·古代水果酒】",
-             "酒香像星河流过，瓶底滚出一颗古老的珠子。",
-             15, 200),
-
-            # 饥荒（示例 1/2）
             ("【饥荒·猪王的馈赠】",
              "猪王开心拍肚皮，地上掉出三颗沉甸甸的珠子，小碎接得飞快。",
              15, 180),
-
-            # 泰拉瑞亚（示例 1/2）
             ("【泰拉瑞亚·红心水晶】",
              "砸碎红心那刻，心跳与珠光一起‘咚’地涨上来。",
              20, 200),
-
-            # 你还需要再补 4 个 SP（建议：星露谷*3、饥荒*1、泰拉瑞亚*1，合计到 10）
         ]
 
         pools = {"N": normal_eggs, "R": rare_eggs, "UR": ur_eggs, "SP": sp_eggs}
         pool = pools.get(cat, [])
         if not (1 <= idx <= len(pool)):
-            # 未定义的编号先给一个“待填充占位”，奖励给很小值，避免报错
             return ("【待补完的彩蛋】",
                     "这里还空着，小碎留了一个位置给未来的故事～",
                     1, 5)
         return pool[idx - 1]
 
-    # === 4) 选择未收集编号（只在“已定义的数量”范围内抽） ===
     def _pick_uncollected(self, user, cat: str):
-        # 当前已定义的可用数量（与你真正补了多少条有关）
+        """从未收集的彩蛋编号中随机挑一个"""
         defined_total = {
-            "N": 3,  # 你补完后改成 len(normal_eggs)
+            "N": 3,
             "R": 3,
             "UR": 3,
-            "SP": 5,  # 目前上面写了 5 条 SP
+            "SP": 3,
         }[cat]
-        # 目标库存上限（图鉴）与已定义数量取最小
-        catalog_total = self._state["egg_system"]["catalog"][cat]
-        total = min(catalog_total, defined_total)
-
         owned = set(user.setdefault("eggs", {}).setdefault(cat, []))
-        candidates = [i for i in range(1, total + 1) if i not in owned]
+        candidates = [i for i in range(1, defined_total + 1) if i not in owned]
         if not candidates:
             return None
         return random.choice(candidates)
 
-    # === 5) 掉落逻辑（修正为“异步生成器”，能正确 yield 输出） ===
-    async def _try_drop_easter_egg(
-        self,
-        event: AstrMessageEvent,
-        *,
-        is_interaction: bool,
-        force: bool = False,
-        verbose: bool = False
-    ):
-        """
-        is_interaction=True  → 15% 掉落
-        is_interaction=False →  5% 掉落
-        force=True           → 这次必定掉落（跳过概率）
-        verbose=True         → 未掉落也会提示（仅调试）
-        """
+    async def _try_drop_easter_egg(self, event, *, is_interaction: bool, force: bool = False, verbose: bool = False):
+        """彩蛋掉落逻辑"""
         self._ensure_egg_state()
         user_id = self._get_user_id(event)
         user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
         user.setdefault("eggs", {"N": [], "R": [], "UR": [], "SP": []})
         user.setdefault("egg_total", 0)
-        user.setdefault("egg_achievements", [])
 
-        # 掉落判定
+        # 概率控制
         p = 0.15 if is_interaction else 0.05
         if not force and random.random() >= p:
             if verbose:
                 yield event.plain_result("（调试）这次没有掉落彩蛋。")
             return
 
-        # 最难 UR（0.5%）优先
+        # 最难 UR
         myth = self._state["egg_system"]["mythic_id"]
         cat, idx, is_mythic = None, None, False
         if random.random() < 0.005:
@@ -765,26 +715,24 @@ async def extra_sign_in(self, event: AstrMessageEvent):
             if pick:
                 cat, idx = "SP", pick
 
-        # 常规权重（N≈80%，R≈19%，UR≈1%）
+        # 常规掉落
         if cat is None:
             r = random.random()
             chosen = "N" if r <= 0.80 else ("R" if r <= 0.99 else "UR")
-            for c in [chosen, "N", "R", "UR", "SP"]:  # 兜底轮询
+            for c in [chosen, "N", "R", "UR", "SP"]:
                 pick = self._pick_uncollected(user, c)
                 if pick:
                     cat, idx = c, pick
                     break
 
-        # 可能已全收集（在当前已定义范围）
         if cat is None or idx is None:
             if verbose:
-                yield event.plain_result("（调试）候选为空：当前已定义的彩蛋可能全收集。")
+                yield event.plain_result("（调试）候选为空：当前彩蛋可能全收集。")
             return
 
-        # 文案 & 奖励
         title, content, favor_inc, marble_inc = self._egg_text(cat, idx)
         if is_mythic:
-            favor_inc, marble_inc = 300, 999  # 强制最难奖励
+            favor_inc, marble_inc = 300, 999
 
         user["favor"] += favor_inc
         user["marbles"] += marble_inc
@@ -801,10 +749,9 @@ async def extra_sign_in(self, event: AstrMessageEvent):
         self._save_state()
         yield event.plain_result("\n".join(lines))
 
-    # === 6) 开发用：强制掉落测试（正确转发异步生成器输出） ===
     @filter.command("掉落测试")
-    async def debug_drop(self, event: AstrMessageEvent):
-        """强制触发一次彩蛋掉落（按“日常互动”通道），便于验证"""
+    async def debug_drop(self, event):
+        """强制触发一次彩蛋掉落（调试用）"""
         got = False
         async for res in self._try_drop_easter_egg(event, is_interaction=True, force=True, verbose=True):
             got = True
@@ -812,16 +759,17 @@ async def extra_sign_in(self, event: AstrMessageEvent):
         if not got:
             yield event.plain_result("（调试）未产生掉落：可能当前已定义彩蛋已全收集。")
 
-    # === 7) 图鉴与详情（如已存在可保留你自己的；否则可用下列精简版） ===
     @filter.command("彩蛋图鉴")
-    async def eggdex(self, event: AstrMessageEvent):
+    async def eggdex(self, event):
+        """查看彩蛋收集总览"""
         self._ensure_egg_state()
         uid = self._get_user_id(event)
         u = self._state["users"].setdefault(uid, {"favor": 0, "marbles": 0})
         u.setdefault("eggs", {"N": [], "R": [], "UR": [], "SP": []})
         c = self._state["egg_system"]["catalog"]
 
-        N, R, UR, SP = (len(u["eggs"]["N"]), len(u["eggs"]["R"]), len(u["eggs"]["UR"]), len(u["eggs"]["SP"]))
+        N, R, UR, SP = (len(u["eggs"]["N"]), len(u["eggs"]["R"]),
+                        len(u["eggs"]["UR"]), len(u["eggs"]["SP"]))
         total = N + R + UR + SP
         bar = lambda got, all_: "█" * min(10, round((got / max(1, all_)) * 10)) + "░" * max(0, 10 - round((got / max(1, all_)) * 10))
 
@@ -837,8 +785,8 @@ async def extra_sign_in(self, event: AstrMessageEvent):
         yield event.plain_result(reply)
 
     @filter.command("彩蛋详情")
-    async def egg_detail(self, event: AstrMessageEvent):
-        """彩蛋详情 普通/稀有/超稀有/特别 —— 展示已收集故事"""
+    async def egg_detail(self, event):
+        """查看某一类彩蛋的详情"""
         self._ensure_egg_state()
         uid = self._get_user_id(event)
         u = self._state["users"].setdefault(uid, {"favor": 0, "marbles": 0})
@@ -864,15 +812,7 @@ async def extra_sign_in(self, event: AstrMessageEvent):
         for idx in got:
             title, content, f_inc, m_inc = self._egg_text(cat, idx)
             out.append(f"{title}\n{content}\n💗 好感+{f_inc}｜🫧 玻璃珠+{m_inc}\n")
-    yield event.plain_result("\n".join(out))
-
-
-
-
-@filter.command("小碎ping")
-async def ping_egg(self, event: AstrMessageEvent):
-    yield event.plain_result("pong（命令绑定正常）")
-
+        yield event.plain_result("\n".join(out))
 
 
 
