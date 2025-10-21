@@ -28,6 +28,10 @@ class MyPlugin(Star):
         except Exception as e:
             logger.error(f"加载数据失败：{e}")
 
+    
+    # ✅ 在这里调用初始化函数
+    self._ensure_egg_state()
+
     def _save_state(self):
         try:
             self._data_path.write_text(json.dumps(self._state, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -67,6 +71,19 @@ class MyPlugin(Star):
         if 18 <= h <= 22:
             return "evening"
         return "midnight"  # 23~4
+
+    # ==== 内部：初始化彩蛋系统结构（必须有） ====
+    def _ensure_egg_state(self):
+        """确保彩蛋系统的状态结构存在"""
+        if "egg_system" not in self._state:
+            self._state["egg_system"] = {}
+        if "users" not in self._state:
+            self._state["users"] = {}
+        es = self._state["egg_system"]
+        # 彩蛋数量配置
+        es.setdefault("catalog", {"N": 25, "R": 10, "UR": 5, "SP": 10})
+        # “最难超稀有彩蛋”的标记（用于0.5%掉落判定）
+        es.setdefault("mythic_id", {"cat": "UR", "id": 5})
 
     # ---- 已有指令：小碎（保留随机多语气） ----
     @filter.command("小碎")
@@ -598,18 +615,7 @@ async def extra_sign_in(self, event: AstrMessageEvent):
     )
     yield event.plain_result(reply)
 
-    # ==== 内部：初始化彩蛋系统结构（必须有） ====
-    def _ensure_egg_state(self):
-        """确保彩蛋系统的状态结构存在"""
-        if "egg_system" not in self._state:
-            self._state["egg_system"] = {}
-        if "users" not in self._state:
-            self._state["users"] = {}
-        es = self._state["egg_system"]
-        # 彩蛋数量配置
-        es.setdefault("catalog", {"N": 25, "R": 10, "UR": 5, "SP": 10})
-        # “最难超稀有彩蛋”的标记（用于0.5%掉落判定）
-        es.setdefault("mythic_id", {"cat": "UR", "id": 5})
+
 
 
 # ==== 彩蛋系统（掉落、去重、成就、图鉴）========================================
