@@ -167,10 +167,6 @@ class MyPlugin(Star):
         )
         yield event.plain_result(reply)
 
-        res = await self._try_drop_egg(event, is_interaction=True)
-        if res: yield res
-    
-
     # ---- 新版：占卜（每日一次，内联数据，仅三组牌）----
     @filter.command("占卜")
     async def divination(self, event: AstrMessageEvent):
@@ -382,8 +378,7 @@ class MyPlugin(Star):
         yield event.plain_result(reply)
 
 
-        res = await self._try_drop_egg(event, is_interaction=True)
-        if res: yield res
+
 
 
 
@@ -501,11 +496,6 @@ class MyPlugin(Star):
             f"💗 当前好感度：{user['favor']}"
         )
         yield event.plain_result(reply)
-
-        res = await self._try_drop_egg(event, is_interaction=True)
-        if res: yield res
-
-
 
 # ---- 新增指令：运势（0与100有特殊奖励）----
 @filter.command("运势")
@@ -684,30 +674,6 @@ async def extra_sign_in(self, event: AstrMessageEvent):
         f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
     )
     yield event.plain_result(reply)
-
-    res = await self._try_drop_egg(event, is_interaction=True)
-    if res: yield res
-
-# ---- 群内消息被动掉落入口（5% 概率）----
-@filter.on_message()
-async def passive_egg_drop(self, event: AstrMessageEvent):
-    """监听所有群消息，用于被动彩蛋掉落"""
-    try:
-        name = event.get_sender_name()
-        # 避免小碎自己或系统消息触发
-        if not name or name == "小碎":
-            return
-
-        res = await self._try_drop_egg(event, is_interaction=False)
-        if res:
-            yield res
-
-    except Exception as e:
-        from astrbot.api import logger
-        logger.error(f"passive_egg_drop 触发异常：{e}")
-
-
-
 
 
 # ==== 彩蛋系统（被动触发 + 成就）========================================
