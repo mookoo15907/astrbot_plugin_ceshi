@@ -788,7 +788,81 @@ def _check_and_award_achievements(self, user_name: str, user_id: str, user: dict
 
     return msgs
 
+# ---- 新增指令：查看成就 ----
+@filter.command("查看成就")
+async def check_achievements(self, event: AstrMessageEvent):
+    """查看已解锁的成就与收集进度"""
+    user_name = event.get_sender_name()
+    user_id = self._get_user_id(event)
+    eggs_state = self._state.get("eggs", {})
+    u = eggs_state.get(user_id)
 
+    if not u:
+        yield event.plain_result(f"{user_name} 还没有发现任何彩蛋呢～快去探索看看吧 (๑•̀ㅂ•́)و✧")
+        return
+
+    collected = u.get("collected", [])
+    specials = u.get("special_collected", [])
+    achievements = u.get("achievements", [])
+
+    # 全部成就列表（与彩蛋系统定义保持一致）
+    ACHIEVEMENTS_INFO = {
+        "a01_any_1":  "第一次发现彩蛋",
+        "a02_any_10": "彩蛋猎人·入门",
+        "a03_any_25": "彩蛋猎人·进阶",
+        "a04_any_40": "彩蛋收藏家",
+        "a05_all_50": "全收集·群星加冕",
+        "a06_sp_all": "特别彩蛋·全收集",
+    }
+
+    unlocked_names = [ACHIEVEMENTS_INFO[a] for a in achievements if a in ACHIEVEMENTS_INFO]
+    locked_names = [ACHIEVEMENTS_INFO[a] for a in ACHIEVEMENTS_INFO if a not in achievements]
+
+    reply = (
+        f"📜 小碎的成就册：\n"
+        f"——— 已解锁 ——\n"
+        + (("\n".join(f"✅ {n}" for n in unlocked_names)) if unlocked_names else "暂无成就～\n")
+        + "\n——— 未解锁 ——\n"
+        + (("\n".join(f"🔒 {n}" for n in locked_names)) if locked_names else "全部解锁啦！🌟")
+        + f"\n\n🥚 彩蛋收集进度：{len(collected)}/50"
+        + f"\n✨ 特别彩蛋收集进度：{len(specials)}/10"
+    )
+    yield event.plain_result(reply)
+
+
+
+# ---- 开发调试指令：程序员菜单测试（固定掉落一个彩蛋）----
+@filter.command("程序员菜单测试")
+async def dev_force_egg(self, event: AstrMessageEvent):
+    """
+    开发者用：固定掉落一个普通彩蛋（n01）
+    用于验证彩蛋系统掉落、奖励与存档逻辑是否正常。
+    """
+    user_name = event.get_sender_name()
+    user_id = self._get_user_id(event)
+    user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+    # 取彩蛋系统中定义的 award 方法来执行奖励逻辑
+    # 这里只固定掉落普通彩蛋 n01
+    egg = ("n01", "【甜甜圈店的奇遇】", "和小碎一起吃到了超棒的草莓燕麦脆珠甜甜圈，意外地在甜甜圈上发现了玻璃珠点缀！", 5, 30)
+
+    # 初始化存档（防止第一次没有彩蛋记录时报错）
+    store = self._state.setdefault("eggs", {})
+    u = store.setdefault(user_id, {
+        "collected": [],
+        "achievements": [],
+        "special_collected": [],
+    })
+
+    # 调用通用奖励逻辑
+    res = await self._award_egg_and_achievements(event, user_name, user_id, user, u, egg, rarity_tag="普通彩蛋")
+    if res:
+        yield res
+    else:
+        yield event.plain_result("彩蛋触发测试失败，请检查彩蛋系统是否正确注册。")
+
+
+    
 
 
     async def terminate(self):
