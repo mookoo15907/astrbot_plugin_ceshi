@@ -167,7 +167,7 @@ class MyPlugin(Star):
         )
         yield event.plain_result(reply)
 
-        res = await self._try_drop_egg(event, is_interaction=True)
+        res = await _try_drop_egg(self,event, is_interaction=True)
         if res: yield res
 
     
@@ -683,10 +683,10 @@ async def extra_sign_in(self, event: AstrMessageEvent):
 # ==== 彩蛋系统（被动触发 + 成就）========================================
 # 用法（请在以下指令最后面各加一行调用）：
 #   - 在“签到”、“我还要签到”、“占卜”、“投喂”的回复 yield 之后，追加：
-#       res = await self._try_drop_egg(event, is_interaction=True)
+#       res = await _try_drop_egg(self,event, is_interaction=True)
 #       if res: yield res
 #   - 若你有一个“群内任意消息入口”（如总 on_message/默认回调），在合适位置追加：
-#       res = await self._try_drop_egg(event, is_interaction=False)
+#       res = await _try_drop_egg(self,event, is_interaction=False)
 #       if res: yield res
 #
 # 说明：
