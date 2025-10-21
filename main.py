@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-@register("helloworld", "YourName", "一个简单的 Hello World 插件", "1.0.0")
+@register("astrbot_plugin_ceshi", "mookoo", "一个简单的插件", "1.0.0")
 class MyPlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
