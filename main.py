@@ -1,6 +1,7 @@
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
+import random  # 新增：用于随机选择回复
 
 @register("helloworld", "YourName", "一个简单的 Hello World 插件", "1.0.0")
 class MyPlugin(Star):
@@ -18,8 +19,18 @@ class MyPlugin(Star):
         message_str = event.message_str  # 用户发的纯文本消息字符串
         message_chain = event.get_messages()  # 用户所发的消息的消息链
         logger.info(message_chain)
-        # 改为你的需求：回复「你好呀，{用户名}，小碎在这里～」
-        yield event.plain_result(f"你好呀，{user_name}，小碎在这里～")
+
+        # 新增：候选回复（5~6 条），触发后随机选一条
+        replies = [
+            f"你好呀，{user_name}，小碎在这里～",
+            f"{user_name}，小碎到咯！找我有什么事吗？",
+            f"在呢在呢～{user_name}，小碎随时待命！",
+            f"喵？是{user_name}在叫我吗～小碎已上线！",
+            f"嘿嘿，{user_name}，小碎来了！需要帮忙的话尽管说～",
+            f"报告！{user_name}，小碎就位！(￣▽￣)ゞ"
+        ]
+        yield event.plain_result(random.choice(replies))  # 随机发送一条
 
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
+
