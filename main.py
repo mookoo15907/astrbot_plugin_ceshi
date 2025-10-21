@@ -169,7 +169,7 @@ class MyPlugin(Star):
 
         res = await self._try_drop_egg(event)
         if res:
-        yield res
+            yield res
 
     
     # ---- 新版：占卜（每日一次，内联数据，仅三组牌）----
@@ -385,7 +385,7 @@ class MyPlugin(Star):
 
         res = await self._try_drop_egg(event)
         if res:
-        yield res
+            yield res
 
 
 
@@ -503,6 +503,10 @@ class MyPlugin(Star):
             f"💗 当前好感度：{user['favor']}"
         )
         yield event.plain_result(reply)
+
+        res = await self._try_drop_egg(event)
+        if res:
+            yield res
 
 # ---- 新增指令：运势（0与100有特殊奖励）----
 @filter.command("运势")
@@ -687,7 +691,7 @@ async def extra_sign_in(self, event: AstrMessageEvent):
 
     res = await self._try_drop_egg(event)
     if res:
-    yield res
+        yield res
 
 
 
