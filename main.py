@@ -689,16 +689,22 @@ async def extra_sign_in(self, event: AstrMessageEvent):
     if res: yield res
 
 # ---- 群内消息被动掉落入口（5% 概率）----
-@filter.message()
+@filter.on_message()
 async def passive_egg_drop(self, event: AstrMessageEvent):
     """监听所有群消息，用于被动彩蛋掉落"""
-    # 避免对自己回复、系统消息重复触发
-    if not event.get_sender_name() or event.get_sender_name() == "小碎":
-        return
+    try:
+        name = event.get_sender_name()
+        # 避免小碎自己或系统消息触发
+        if not name or name == "小碎":
+            return
 
-    res = await self._try_drop_egg(event, is_interaction=False)
-    if res:
-        yield res
+        res = await self._try_drop_egg(event, is_interaction=False)
+        if res:
+            yield res
+
+    except Exception as e:
+        from astrbot.api import logger
+        logger.error(f"passive_egg_drop 触发异常：{e}")
 
 
 
