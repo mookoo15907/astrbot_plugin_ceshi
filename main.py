@@ -177,75 +177,200 @@ class MyPlugin(Star):
             f"{user_name} 的背包：\n好感度：{info['favor']}\n玻璃珠：{info['marbles']}"
         )
 
-    # ---- 新增指令：占卜（每日一次）----
+    # ---- 新版：占卜（每日一次，内联数据，仅三组牌）----
     @filter.command("占卜")
     async def divination(self, event: AstrMessageEvent):
         """
         每日仅可占卜一次：
-        - 扣 20 玻璃珠占卜费（仅在今日首次占卜时扣）
-        - 抽 22 大阿卡那（正/逆）
-        - 展示牌面等级（SSS/SS/S/B/C/D/F）与中文形容词
-        - 好牌给祝福、坏牌给安慰；玻璃珠变动受牌面影响（±266 封顶）
-        - SSS 牌 10% 中奖 +999 玻璃珠
+        - 首次占卜扣 20 玻璃珠
+        - 随机抽取 22 大阿卡那中的前三组（愚者/魔术师/女祭司，含正逆）
+        - 展示等级（SSS/SS/S/B/C/D/F）和中文形容，并根据好/波动/坏给祝福或安慰
+        - 玻璃珠增减区间受等级影响（最终裁切到 ±266）
         - 好感度 +0~50，与牌面无关
+        - SSS 牌有 10% 额外 +999 玻璃珠奖励
         """
         user_name = event.get_sender_name()
         user_id = self._get_user_id(event)
         user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
 
+        # 每日一次
         today = datetime.now().date().isoformat()
         if user.get("last_divine") == today:
-            # 今日已占卜，直接提示冷却；不扣费不改数值
             yield event.plain_result(
                 f"🔒 {user_name}，今天已经占卜过啦～明天再来试试命运之轮吧！\n"
                 f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
             )
             return
 
-        # -- 首次占卜：扣占卜费 --
+        # 占卜费用（仅首次）
         fee = 20
         user["marbles"] = user.get("marbles", 0) - fee
 
-        # -- 随机牌面 --
-        cards = self._get_arcana_data()
-        card_name = random.choice(list(cards.keys()))
+        # 等级 -> 形容词 & 玻璃珠区间（最终会裁切到 ±266）
+        RATING_WORD = {
+            "SSS": "特别棒的",
+            "SS":  "很好的",
+            "S":   "不错的",
+            "B":   "有波动的",
+            "C":   "不太顺的",
+            "D":   "糟心的",
+            "F":   "相当危险的",
+        }
+        MARBLE_RANGE = {
+            "SSS": (200, 266),
+            "SS":  (120, 220),
+            "S":   (40, 160),
+            "B":   (-60, 120),
+            "C":   (-160, 40),
+            "D":   (-220, -40),
+            "F":   (-266, -120),
+        }
+
+        # 仅前三组牌（正/逆）
+        CARDS = {
+            "愚者": {
+                "upright":  {"core": "自由", "type": "SS",  "keywords": ["起点","冒险","单纯","信任","未知","旅途"], "interp": "拥抱未知，轻装上路会带来新鲜突破。"},
+                "reversed": {"core": "鲁莽", "type": "C",   "keywords": ["冲动","迷路","逃避","风险","幼稚","分心"], "interp": "先看脚下再跳，边界与计划缺一不可。"},
+            },
+            "魔术师": {
+                "upright":  {"core": "创造", "type": "SSS", "keywords": ["专注","沟通","资源","技巧","显化","机会"], "interp": "心之所向可被实现，主动出手就是魔法。"},
+                "reversed": {"core": "失衡", "type": "D",   "keywords": ["欺骗","分神","虚张","失控","散漫","反复"], "interp": "谨防口惠而实不至，把能量收束回到行动。"},
+            },
+            "女祭司": {
+                "upright":  {"core": "直觉", "type": "S",   "keywords": ["潜意识","静观","神秘","梦境","洞察","沉默"], "interp": "答案在心底，给直觉一点安静的空间。"},
+                "reversed": {"core": "压抑", "type": "C",   "keywords": ["怀疑","迟疑","隔阂","隐瞒","自我否定","迷雾"], "interp": "过度压抑会遮蔽线索，承认感受即是起点。"},
+            "女皇": {
+                "upright": {"core": "丰盛", "type": "SS",  "keywords": ["滋养","艺术","美感","安全","享受","生长"], "interp": "宽松与滋养让事物自然成熟。"},
+                "reversed":{"core": "滞养", "type": "C",   "keywords": ["懒散","依赖","过度","窒息","空虚","拖延"], "interp": "爱与边界并重，别用纵容替代成长。"},
+            },
+           "皇帝": {
+                "upright": {"core": "秩序", "type": "SS",  "keywords": ["结构","权威","规则","担当","稳固","治理"], "interp": "立规矩、定节奏，力量在于可持续的秩序。"},
+                "reversed":{"core": "强控", "type": "D",   "keywords": ["僵化","独断","控制","硬碰","压制","冷硬"], "interp": "别让控制欲反噬结果，学会授权与倾听。"},
+            },
+           "教皇": {
+                "upright": {"core": "传承", "type": "S",   "keywords": ["规范","学习","导师","体系","礼仪","社群"], "interp": "回到传统或向导师求助，走正道事半功倍。"},
+                "reversed":{"core": "僵套", "type": "C",   "keywords": ["形式","教条","束缚","盲从","评判","停滞"], "interp": "打破过时规范，保留核心精神即可。"},
+            },
+           "恋人": {
+                "upright": {"core": "选择", "type": "SS",  "keywords": ["连接","价值","吸引","坦诚","契合","合一"], "interp": "出于价值一致的选择，会让关系与项目共振。"},
+                "reversed":{"core": "分岔", "type": "D",   "keywords": ["犹豫","错配","逃避","摇摆","分裂","矛盾"], "interp": "先对齐自我价值，再谈承诺与合作。"},
+            },
+           "战车": {
+                "upright": {"core": "掌控", "type": "SS",  "keywords": ["推进","胜利","纪律","意志","速度","聚焦"], "interp": "握紧缰绳直面阻力，胜利来自持续推进。"},
+                "reversed":{"core": "失控", "type": "D",   "keywords": ["偏航","内耗","拖延","分散","冲撞","放纵"], "interp": "收窄目标，先稳住方向再提速。"},
+            },
+           "力量": {
+                "upright": {"core": "勇毅", "type": "SS",  "keywords": ["温柔","自律","驯服","耐心","治愈","自信"], "interp": "以温柔而坚定之力，化解粗暴的对抗。"},
+                "reversed":{"core": "脆弱", "type": "C",   "keywords": ["自卑","急躁","压抑","失衡","逃避","怯场"], "interp": "照看脆弱面，练习稳定而非强撑。"},
+            },
+           "隐者": {
+                "upright": {"core": "独省", "type": "S",   "keywords": ["内观","独处","导师","灯塔","专研","简化"], "interp": "退一步看全局，答案在寂静里亮起。"},
+                "reversed":{"core": "闭塞", "type": "C",   "keywords": ["孤立","躲避","空转","迟缓","拒绝","狭隘"], "interp": "别把独处变成逃避，适度连结会解锁路径。"},
+            },
+           "命运之轮": {
+                "upright": {"core": "转机", "type": "SS",  "keywords": ["周期","机缘","上升","变化","同步","幸运"], "interp": "顺势而为，抓住轮转中的上升窗口。"},
+                "reversed":{"core": "逆风", "type": "B",   "keywords": ["延迟","反复","卡点","外因","停滞","错过"], "interp": "承认周期低谷，调整节奏等风向。"},
+            },
+           "正义": {
+                "upright": {"core": "公正", "type": "S",   "keywords": ["因果","平衡","契约","选择","透明","责任"], "interp": "以事实与原则决断，你会获得清明的结果。"},
+                "reversed":{"core": "失衡", "type": "C",   "keywords": ["偏颇","不公","拖延","误判","隐情","反噬"], "interp": "补充证据与视角，避免情绪化裁决。"},
+            },
+           "倒吊人": {
+                "upright": {"core": "悬思", "type": "S",   "keywords": ["暂停","换位","牺牲","洞见","重置","等待"], "interp": "短暂停顿换来视角跃迁。"},
+                "reversed":{"core": "僵滞", "type": "C",   "keywords": ["拖延","停摆","怨怼","固执","内耗","错位"], "interp": "把‘等’变成‘选’，主动定义牺牲的意义。"},
+            },
+           "死神": {
+                "upright": {"core": "更迭", "type": "SS",  "keywords": ["终结","更新","断舍","再生","替换","清理"], "interp": "果断收尾为新生腾位。"},
+                "reversed":{"core": "拒变", "type": "D",   "keywords": ["拖延","回头","依恋","冗余","旧习","惧怕"], "interp": "停止无效维持，给变化让路。"},
+            },
+            "节制": {
+                "upright": {"core": "调和", "type": "SS",  "keywords": ["节律","配比","耐心","整合","中道","疗愈"], "interp": "在流动中寻均衡，小步慢跑更长久。"},
+                "reversed":{"core": "失调", "type": "B",   "keywords": ["过度","失衡","忽冷忽热","碎片","焦躁","溢出"], "interp": "收束变量，回到可持续的节律。"},
+            },
+           "恶魔": {
+                "upright": {"core": "欲念", "type": "B",   "keywords": ["绑定","诱惑","执念","物欲","依赖","影子"], "interp": "看见枷锁就能松开一环，自由从自知开始。"},
+                "reversed":{"core": "解脱", "type": "S",   "keywords": ["觉醒","松绑","复元","止损","断链","净化"], "interp": "认清代价后抽身即自由。"},
+            },
+           "塔": {
+                "upright": {"core": "崩解", "type": "F",   "keywords": ["突变","瓦解","震荡","清算","暴露","冲击"], "interp": "虚假结构会倒塌，但废墟里藏着蓝图。"},
+                "reversed":{"core": "余震", "type": "D",   "keywords": ["拖延崩塌","否认","裂缝","补漏","侥幸","反复"], "interp": "与其补裂缝不如重构地基。"},
+            },
+           "星星": {
+                "upright": {"core": "希望", "type": "SSS", "keywords": ["灵感","疗愈","宁静","远景","指引","信念"], "interp": "保持清澈与耐心，愿景会被星光照亮。"},
+                "reversed":{"core": "失望", "type": "C",   "keywords": ["怀疑","黯淡","迟疑","能量低","灰心","散失"], "interp": "先修复自我，再点亮小目标重拾光感。"},
+            },
+           "月亮": {
+                "upright": {"core": "潜影", "type": "B",   "keywords": ["直觉","不安","幻象","循环","想象","夜行"], "interp": "穿过情绪的潮汐，别急着下结论。"},
+                "reversed":{"core": "澄清", "type": "S",   "keywords": ["解谜","真相","落地","收束","排雷","整理"], "interp": "迷雾散开，事实比恐惧更温和。"},
+            },
+           "太阳": {
+                "upright": {"core": "喜悦", "type": "SSS", "keywords": ["成功","童真","能量","清晰","庆祝","丰收"], "interp": "全速前进，舞台灯正亮着。"},
+                "reversed":{"core": "过曝", "type": "B",   "keywords": ["浮夸","急躁","骄矜","热度降","注意力","偏差"], "interp": "把热情落地到可验证的成果。"},
+            },
+           "审判": {
+                "upright": {"core": "觉醒", "type": "SS",  "keywords": ["召回","复盘","重启","赎回","抉择","复活"], "interp": "回应内在召唤，一锤定音。"},
+                "reversed":{"core": "犹疑", "type": "C",   "keywords": ["拖延","错过","逃避","自责","反刍","滞后"], "interp": "停止自我审判，把行动交给现在。"},
+            },
+           "世界": {
+                "upright": {"core": "完成", "type": "SS",  "keywords": ["闭环","整合","里程","里程碑","联结","自由行"], "interp": "阶段性圆满，准备迎接新的层级。"},
+                "reversed":{"core": "未竟", "type": "B",   "keywords": ["差一步","拼图缺","拖尾","松散","跳级","循环"], "interp": "把尾巴收好，再开启下一段航程。"},
+            },
+        }
+
+        # 随机抽牌与正逆
+        card_name = random.choice(list(CARDS.keys()))
         upright = random.choice([True, False])
         orient = "upright" if upright else "reversed"
-        m = cards[card_name][orient]  # dict: core/type/keywords/interp
+        m = CARDS[card_name][orient]
         orient_cn = "正位" if upright else "逆位"
+        rating = m["type"]
 
-        # -- 牌面等级与玻璃珠变化 --
-        rating = m["type"]  # SSS/SS/S/B/C/D/F
-        ranges = self._get_marble_range()
-        rmin, rmax = ranges[rating]
+        # 玻璃珠增减（按等级），并裁切到 ±266
+        rmin, rmax = MARBLE_RANGE[rating]
         marble_delta = random.randint(rmin, rmax)
-        marble_delta = max(-266, min(266, marble_delta))  # clip 到 ±266
+        marble_delta = max(-266, min(266, marble_delta))
 
-        # -- 好感度独立增长 --
+        # 好感度独立 +0~50
         favor_inc = random.randint(0, 50)
 
-        # -- 特别棒（SSS）10% 中奖 +999 --
+        # SSS 10% 额外奖励
         bonus = 0
         bonus_text = ""
         if rating == "SSS" and random.random() < 0.10:
             bonus = 999
             bonus_text = "\n🎉 中奖时刻！群星垂青，额外获得 **999** 颗玻璃珠！"
 
-        # -- 祝福/安慰语 --
-        bucket = self._rating_bucket(rating)  # 'good' | 'swing' | 'bad'
-        mood_line = self._bless_or_comfort(bucket)
+        # 好/波动/坏 -> 祝福/安慰
+        if rating in ("SSS", "SS", "S"):
+            mood_pool = [
+                "🕊️ 祝福送达：顺风顺水、步步开花！",
+                "🌟 保持清澈与专注，好运与成果相互奔赴。",
+                "🚀 节奏对了就别停，今天的舞台灯正亮着。",
+            ]
+        elif rating == "B":
+            mood_pool = [
+                "🌗 形势有波动，收束变量稳稳推进。",
+                "🧭 先拿下一个小目标，趋势自然会靠拢你。",
+                "⚖️ 少量正确比大量盲冲更强。",
+            ]
+        else:
+            mood_pool = [
+                "🫧 别怕，先安顿好自己，路会在脚下重新出现。",
+                "🌧️ 暂避锋芒也算前进，修复能量再出发。",
+                "🛡️ 把风险写出来就降级一半，慢慢来，一切都会过去。",
+            ]
+        mood_line = random.choice(mood_pool)
 
-        # -- 更新数据并标记今日已占卜 --
-        user["favor"] = user.get("favor", 0) + favor_inc
-        user["marbles"] = user.get("marbles", 0) + marble_delta + bonus
+        # 更新状态并标记今日已占卜
+        user["favor"] += favor_inc
+        user["marbles"] += marble_delta + bonus
         user["last_divine"] = today
         self._save_state()
 
-        # -- 展示 --
+        # 输出
         def fmt_signed(n: int) -> str:
             return f"+{n}" if n >= 0 else f"{n}"
-
-        rating_word = self._get_rating_word()[rating]  # 例如 “特别棒的”
+        rating_word = RATING_WORD[rating]
         keywords = "、".join(m["keywords"][:6])
 
         reply = (
@@ -261,137 +386,6 @@ class MyPlugin(Star):
         )
         yield event.plain_result(reply)
 
-        def _rating_bucket(self, rating: str) -> str:
-        """
-        把七档等级映射为三种语气：
-        - good: SSS/SS/S
-        - swing: B（有波动）
-        - bad: C/D/F
-        """
-        if rating in ("SSS", "SS", "S"):
-            return "good"
-        if rating == "B":
-            return "swing"
-        return "bad"
-
-
-
-    # ====== 以下是占卜数据的延迟加载方法们 ======
-
-    def _get_rating_word(self):
-        return {
-            "SSS": "特别棒的",
-            "SS": "很好的",
-            "S": "不错的",
-            "B": "有波动的",
-            "C": "不太顺的",
-            "D": "糟心的",
-            "F": "相当危险的",
-        }
-
-    def _get_marble_range(self):
-        return {
-            "SSS": (200, 266),
-            "SS": (120, 220),
-            "S": (40, 160),
-            "B": (-60, 120),
-            "C": (-160, 40),
-            "D": (-220, -40),
-            "F": (-266, -120),
-        }
-
-    def _get_arcana_data(self):
-        """返回22张大阿卡那及正逆含义"""
-        return {
-            "愚者": {
-                "upright": {"core": "自由", "type": "SS", "keywords": ["起点","冒险","单纯","信任","未知","旅途"], "interp": "拥抱未知，轻装上路会带来新鲜突破。"},
-                "reversed": {"core": "鲁莽", "type": "C", "keywords": ["冲动","迷路","逃避","风险","幼稚","分心"], "interp": "先看脚下再跳，边界与计划缺一不可。"},
-            },
-            "魔术师": {
-                "upright": {"core": "创造", "type": "SSS", "keywords": ["专注","沟通","资源","技巧","显化","机会"], "interp": "心之所向可被实现，主动出手就是魔法。"},
-                "reversed": {"core": "失衡", "type": "D", "keywords": ["欺骗","分神","虚张","失控","散漫","反复"], "interp": "谨防口惠而实不至，把能量收束回到行动。"},
-            },
-            "女祭司": {
-                "upright": {"core": "直觉", "type": "S", "keywords": ["潜意识","静观","神秘","梦境","洞察","沉默"], "interp": "答案在心底，给直觉一点安静的空间。"},
-                "reversed": {"core": "压抑", "type": "C", "keywords": ["怀疑","迟疑","隔阂","隐瞒","自我否定","迷雾"], "interp": "过度压抑会遮蔽线索，承认感受即是起点。"},
-            },
-            "女皇": {
-            "upright": {"core": "丰盛", "type": "SS",  "keywords": ["滋养","艺术","美感","安全","享受","生长"], "interp": "宽松与滋养让事物自然成熟。"},
-            "reversed":{"core": "滞养", "type": "C",   "keywords": ["懒散","依赖","过度","窒息","空虚","拖延"], "interp": "爱与边界并重，别用纵容替代成长。"},
-            },
-           "皇帝": {
-            "upright": {"core": "秩序", "type": "SS",  "keywords": ["结构","权威","规则","担当","稳固","治理"], "interp": "立规矩、定节奏，力量在于可持续的秩序。"},
-            "reversed":{"core": "强控", "type": "D",   "keywords": ["僵化","独断","控制","硬碰","压制","冷硬"], "interp": "别让控制欲反噬结果，学会授权与倾听。"},
-            },
-           "教皇": {
-            "upright": {"core": "传承", "type": "S",   "keywords": ["规范","学习","导师","体系","礼仪","社群"], "interp": "回到传统或向导师求助，走正道事半功倍。"},
-            "reversed":{"core": "僵套", "type": "C",   "keywords": ["形式","教条","束缚","盲从","评判","停滞"], "interp": "打破过时规范，保留核心精神即可。"},
-            },
-           "恋人": {
-            "upright": {"core": "选择", "type": "SS",  "keywords": ["连接","价值","吸引","坦诚","契合","合一"], "interp": "出于价值一致的选择，会让关系与项目共振。"},
-            "reversed":{"core": "分岔", "type": "D",   "keywords": ["犹豫","错配","逃避","摇摆","分裂","矛盾"], "interp": "先对齐自我价值，再谈承诺与合作。"},
-            },
-           "战车": {
-            "upright": {"core": "掌控", "type": "SS",  "keywords": ["推进","胜利","纪律","意志","速度","聚焦"], "interp": "握紧缰绳直面阻力，胜利来自持续推进。"},
-            "reversed":{"core": "失控", "type": "D",   "keywords": ["偏航","内耗","拖延","分散","冲撞","放纵"], "interp": "收窄目标，先稳住方向再提速。"},
-            },
-           "力量": {
-            "upright": {"core": "勇毅", "type": "SS",  "keywords": ["温柔","自律","驯服","耐心","治愈","自信"], "interp": "以温柔而坚定之力，化解粗暴的对抗。"},
-            "reversed":{"core": "脆弱", "type": "C",   "keywords": ["自卑","急躁","压抑","失衡","逃避","怯场"], "interp": "照看脆弱面，练习稳定而非强撑。"},
-            },
-           "隐者": {
-            "upright": {"core": "独省", "type": "S",   "keywords": ["内观","独处","导师","灯塔","专研","简化"], "interp": "退一步看全局，答案在寂静里亮起。"},
-            "reversed":{"core": "闭塞", "type": "C",   "keywords": ["孤立","躲避","空转","迟缓","拒绝","狭隘"], "interp": "别把独处变成逃避，适度连结会解锁路径。"},
-            },
-           "命运之轮": {
-            "upright": {"core": "转机", "type": "SS",  "keywords": ["周期","机缘","上升","变化","同步","幸运"], "interp": "顺势而为，抓住轮转中的上升窗口。"},
-            "reversed":{"core": "逆风", "type": "B",   "keywords": ["延迟","反复","卡点","外因","停滞","错过"], "interp": "承认周期低谷，调整节奏等风向。"},
-            },
-           "正义": {
-            "upright": {"core": "公正", "type": "S",   "keywords": ["因果","平衡","契约","选择","透明","责任"], "interp": "以事实与原则决断，你会获得清明的结果。"},
-            "reversed":{"core": "失衡", "type": "C",   "keywords": ["偏颇","不公","拖延","误判","隐情","反噬"], "interp": "补充证据与视角，避免情绪化裁决。"},
-            },
-           "倒吊人": {
-            "upright": {"core": "悬思", "type": "S",   "keywords": ["暂停","换位","牺牲","洞见","重置","等待"], "interp": "短暂停顿换来视角跃迁。"},
-            "reversed":{"core": "僵滞", "type": "C",   "keywords": ["拖延","停摆","怨怼","固执","内耗","错位"], "interp": "把‘等’变成‘选’，主动定义牺牲的意义。"},
-            },
-           "死神": {
-            "upright": {"core": "更迭", "type": "SS",  "keywords": ["终结","更新","断舍","再生","替换","清理"], "interp": "果断收尾为新生腾位。"},
-            "reversed":{"core": "拒变", "type": "D",   "keywords": ["拖延","回头","依恋","冗余","旧习","惧怕"], "interp": "停止无效维持，给变化让路。"},
-            },
-            "节制": {
-            "upright": {"core": "调和", "type": "SS",  "keywords": ["节律","配比","耐心","整合","中道","疗愈"], "interp": "在流动中寻均衡，小步慢跑更长久。"},
-            "reversed":{"core": "失调", "type": "B",   "keywords": ["过度","失衡","忽冷忽热","碎片","焦躁","溢出"], "interp": "收束变量，回到可持续的节律。"},
-            },
-           "恶魔": {
-            "upright": {"core": "欲念", "type": "B",   "keywords": ["绑定","诱惑","执念","物欲","依赖","影子"], "interp": "看见枷锁就能松开一环，自由从自知开始。"},
-            "reversed":{"core": "解脱", "type": "S",   "keywords": ["觉醒","松绑","复元","止损","断链","净化"], "interp": "认清代价后抽身即自由。"},
-            },
-           "塔": {
-            "upright": {"core": "崩解", "type": "F",   "keywords": ["突变","瓦解","震荡","清算","暴露","冲击"], "interp": "虚假结构会倒塌，但废墟里藏着蓝图。"},
-            "reversed":{"core": "余震", "type": "D",   "keywords": ["拖延崩塌","否认","裂缝","补漏","侥幸","反复"], "interp": "与其补裂缝不如重构地基。"},
-            },
-           "星星": {
-            "upright": {"core": "希望", "type": "SSS", "keywords": ["灵感","疗愈","宁静","远景","指引","信念"], "interp": "保持清澈与耐心，愿景会被星光照亮。"},
-            "reversed":{"core": "失望", "type": "C",   "keywords": ["怀疑","黯淡","迟疑","能量低","灰心","散失"], "interp": "先修复自我，再点亮小目标重拾光感。"},
-            },
-           "月亮": {
-            "upright": {"core": "潜影", "type": "B",   "keywords": ["直觉","不安","幻象","循环","想象","夜行"], "interp": "穿过情绪的潮汐，别急着下结论。"},
-            "reversed":{"core": "澄清", "type": "S",   "keywords": ["解谜","真相","落地","收束","排雷","整理"], "interp": "迷雾散开，事实比恐惧更温和。"},
-            },
-           "太阳": {
-            "upright": {"core": "喜悦", "type": "SSS", "keywords": ["成功","童真","能量","清晰","庆祝","丰收"], "interp": "全速前进，舞台灯正亮着。"},
-            "reversed":{"core": "过曝", "type": "B",   "keywords": ["浮夸","急躁","骄矜","热度降","注意力","偏差"], "interp": "把热情落地到可验证的成果。"},
-            },
-           "审判": {
-            "upright": {"core": "觉醒", "type": "SS",  "keywords": ["召回","复盘","重启","赎回","抉择","复活"], "interp": "回应内在召唤，一锤定音。"},
-            "reversed":{"core": "犹疑", "type": "C",   "keywords": ["拖延","错过","逃避","自责","反刍","滞后"], "interp": "停止自我审判，把行动交给现在。"},
-            },
-           "世界": {
-            "upright": {"core": "完成", "type": "SS",  "keywords": ["闭环","整合","里程","里程碑","联结","自由行"], "interp": "阶段性圆满，准备迎接新的层级。"},
-            "reversed":{"core": "未竟", "type": "B",   "keywords": ["差一步","拼图缺","拖尾","松散","跳级","循环"], "interp": "把尾巴收好，再开启下一段航程。"},
-            },
-        }
 
 
     async def terminate(self):
