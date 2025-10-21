@@ -186,7 +186,7 @@ class MyPlugin(Star):
         today = datetime.now().date().isoformat()
         if user.get("last_divine") == today:
             yield event.plain_result(
-                f"🔒 {user_name}，今天已经占卜过啦～明天再来试试命运之轮吧！\n"
+                f"🔒 {user_name}，今天已经占卜过啦～明天再来试试吧！\n"
                 f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
             )
             return
@@ -366,7 +366,7 @@ class MyPlugin(Star):
         bonus_text = ""
         if rating == "SSS" and random.random() < 0.10:
             bonus = 999
-            bonus_text = "\n🎉 中奖时刻！群星垂青，额外获得 **999** 颗玻璃珠！"
+            bonus_text = "\n🎉 超级幸运~中奖时刻！是抽中SSS也非常少见的大奖~小碎额外送你 **999** 颗玻璃珠~！"
 
         # --- 祝福/提醒/安慰 ---
         mood_line = pick_mood_line(rating)
@@ -396,6 +396,36 @@ class MyPlugin(Star):
         )
         yield event.plain_result(reply)
 
+    # ---- 新增指令：好感度 ----
+    @filter.command("好感度")
+    async def show_favor(self, event: AstrMessageEvent):
+        """查看当前用户的好感度数值"""
+        user_name = event.get_sender_name()
+        user_id = self._get_user_id(event)
+        user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+        favor = user.get("favor", 0)
+        marbles = user.get("marbles", 0)
+
+        # 根据好感度区间生成不同风格语句
+        if favor < 100:
+            mood = " (*ﾟｰﾟ)ゞ 诶嘿…小碎还在努力记住你呢～要多来和我说话哦！"
+        elif favor < 250:
+            mood = " (｡>∀<｡) 小碎已经开始熟悉你啦～总觉得你挺温柔的♪"
+        elif favor < 400:
+            mood = " 嘿嘿～小碎现在超喜欢和你聊天，每次都好开心～"
+        elif favor < 800:
+            mood = " (*´∀｀*)ﾉ 小碎对你已经特别信任啦～会把秘密都告诉你的程度♡"
+        else:
+            mood = " (〃ﾉωﾉ)♡ 小碎最最喜欢你啦～每次看到你心里都冒泡泡～！"
+
+        reply = (
+            f"{user_name} 的当前状态：\n"
+            f"💗 好感度：{favor}\n"
+            f"🫧 玻璃珠：{marbles}\n"
+            f"{mood}"
+        )
+        yield event.plain_result(reply)
 
 
 
