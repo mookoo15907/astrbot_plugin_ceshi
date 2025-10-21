@@ -14,7 +14,7 @@ class MyPlugin(Star):
         # 数据持久化文件：插件同目录 data/xiaosui_state.json
         self._data_dir = Path(__file__).parent / "data"
         self._data_path = self._data_dir / "xiaosui_state.json"
-        self._state = {"users": {}}  # { user_id: {"favor": int, "marbles": int} }
+        self._state = {"users": {}}  # { user_id: {"favor": int, "marbles": int, "last_sign": "YYYY-MM-DD"} }
 
     async def initialize(self):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
@@ -36,7 +36,6 @@ class MyPlugin(Star):
 
     def _get_user_id(self, event: AstrMessageEvent) -> str:
         """尽量稳妥地拿一个用户唯一标识"""
-        # 尝试常见方法
         for getter in ("get_sender_id", "get_user_id", "get_sender_qq"):
             fn = getattr(event, getter, None)
             if callable(fn):
@@ -46,7 +45,6 @@ class MyPlugin(Star):
                         return str(uid)
                 except Exception:
                     pass
-        # 退而求其次：从 event.sender 取
         try:
             sender = getattr(event, "sender", None)
             if sender and hasattr(sender, "id"):
@@ -55,7 +53,6 @@ class MyPlugin(Star):
                 return str(sender.user_id)
         except Exception:
             pass
-        # 最后兜底：用名字（不推荐，但总不能空着）
         return f"name::{event.get_sender_name()}"
 
     def _time_period(self, now: datetime | None = None) -> str:
@@ -71,7 +68,7 @@ class MyPlugin(Star):
             return "evening"
         return "midnight"  # 23~4
 
-    # ---- 已有指令：小碎（保留随机多语气示例更有生命力） ----
+    # ---- 已有指令：小碎（保留随机多语气） ----
     @filter.command("小碎")
     async def helloworld(self, event: AstrMessageEvent):
         """这是一个 hello world 指令"""
@@ -90,12 +87,22 @@ class MyPlugin(Star):
         ]
         yield event.plain_result(random.choice(replies))
 
-    # ---- 新增指令：签到 ----
+    # ---- 新增指令：签到（已加“每日一次”限制） ----
     @filter.command("签到")
     async def sign_in(self, event: AstrMessageEvent):
-        """根据时间段打招呼 + 随机获得好感度与玻璃珠，并记录到背包"""
+        """根据时间段打招呼 + 随机获得好感度与玻璃珠，并记录到背包；每日仅可签到一次"""
         user_name = event.get_sender_name()
         user_id = self._get_user_id(event)
+
+        # ——【新增：每天只能签到一次的校验】——
+        today = datetime.now().date().isoformat()
+        user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+        if user.get("last_sign") == today:
+            yield event.plain_result(
+                f"{user_name}，今天已经签过到啦～\n当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
+            )
+            return
+        # ——【新增结束】——
 
         period = self._time_period()
         pool = {
@@ -146,9 +153,10 @@ class MyPlugin(Star):
         favor_inc = random.randint(0, 30)
         marbles_inc = random.randint(0, 30)
 
-        user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+        # 此处直接使用上面已获取/创建的 user
         user["favor"] += favor_inc
         user["marbles"] += marbles_inc
+        user["last_sign"] = today  # 记录今天已签到
         self._save_state()
 
         reply = (
