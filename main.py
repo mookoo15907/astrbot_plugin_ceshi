@@ -187,7 +187,7 @@ class MyPlugin(Star):
         today = datetime.now().date().isoformat()
         if user.get("last_divine") == today:
             yield event.plain_result(
-                f"🔒 {user_name}，今天已经占卜过啦～明天再来试试命运之轮吧！\n"
+                f"🔒 {user_name}，今天已经占卜过啦～明天再来试试吧！\n"
                 f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
             )
             return
@@ -589,7 +589,7 @@ async def extra_sign_in(self, event: AstrMessageEvent):
         "记录一下扎实的努力！",
         "稳步前进就是胜利～",
         "打卡！小目标正在靠近你～",
-        "勤能补拙，今天也很棒！",
+        "今天的你也很棒哦~！",
         "有在认真生活的味道～",
         "努力被宇宙看见啦！",
         "悄悄耕耘，静待花开～",
@@ -598,8 +598,8 @@ async def extra_sign_in(self, event: AstrMessageEvent):
         "今日功课√ 给自己点个赞！",
         "进度条+1，能量值+1！",
         "你在变好，小碎看得见～",
-        "认真这件事，你赢麻了～",
-        "坚持的人自带光～"
+        "今天也在认真打卡吗~（小碎鼓励的眼神）",
+        "坚持的人自带闪光～"
     ]
     diligent_text = random.choice(diligent_lines)
 
@@ -876,12 +876,12 @@ def _check_and_award_achievements(self, user_name: str, user_id: str, user: dict
 
     # 成就定义（key, 触发条件函数, 奖励favor, 奖励marbles, 展示名）
     ACHIEVEMENTS = [
-        ("a01_any_1",    lambda: len(owned) >= 1,   2,   5,   "第一次发现彩蛋"),
-        ("a02_any_10",   lambda: len(owned) >= 10, 10,  30,   "彩蛋猎人·入门"),
-        ("a03_any_25",   lambda: len(owned) >= 25, 20,  80,   "彩蛋猎人·进阶"),
-        ("a04_any_40",   lambda: len(owned) >= 40, 40, 150,   "彩蛋收藏家"),
-        ("a05_all_50",   lambda: len(owned) >= 50, 100, 500,  "全收集·群星加冕"),
-        ("a06_sp_all",   lambda: len(owned_special) >= 10, 60, 300, "特别彩蛋·全收集"),
+        ("a01_any_1",    lambda: len(owned) >= 1,   2,   5,   "「小碎的第一颗蛋」 —— 小碎开心地举起它，眼睛闪闪发光。"),
+        ("a02_any_10",   lambda: len(owned) >= 10, 10,  30,   "「彩蛋连连看」 —— 你的篮子叮叮当当，越来越重啦～"),
+        ("a03_any_25",   lambda: len(owned) >= 25, 20,  80,   "「珍重的回忆」 —— 旅程已经过了一半。"),
+        ("a04_any_40",   lambda: len(owned) >= 40, 40, 150,   "「叮咚！小碎的惊喜仓库」 —— 彩蛋多到小碎要数不过来了！"),
+        ("a05_all_50",   lambda: len(owned) >= 50, 100, 500,  "「小碎的终极闪闪收藏」 —— 全部集齐，连星星都在鼓掌～"),
+        ("a06_sp_all",   lambda: len(owned_special) >= 10, 60, 300, "「特别蛋大冒险！」 —— 小碎和你跑遍世界，收集到了所有的奇迹！"),
     ]
 
     for key, cond, fav, marb, title in ACHIEVEMENTS:
@@ -922,12 +922,12 @@ async def check_achievements(self, event: AstrMessageEvent):
 
     # 全部成就列表（与彩蛋系统定义保持一致）
     ACHIEVEMENTS_INFO = {
-        "a01_any_1":  "第一次发现彩蛋",
-        "a02_any_10": "彩蛋猎人·入门",
-        "a03_any_25": "彩蛋猎人·进阶",
-        "a04_any_40": "彩蛋收藏家",
-        "a05_all_50": "全收集·群星加冕",
-        "a06_sp_all": "特别彩蛋·全收集",
+        "a01_any_1":  "「小碎的第一颗蛋」 —— 小碎开心地举起它，眼睛闪闪发光。",
+        "a02_any_10": "「彩蛋连连看」 —— 你的篮子叮叮当当，越来越重啦～",
+        "a03_any_25": "「珍重的回忆」 —— 旅程已经过了一半。",
+        "a04_any_40": "「叮咚！小碎的惊喜仓库」 —— 彩蛋多到小碎要数不过来了！",
+        "a05_all_50": "「小碎的终极闪闪收藏」 —— 全部集齐，连星星都在鼓掌～",
+        "a06_sp_all": "「特别蛋大冒险！」 —— 小碎和你跑遍世界，收集到了所有的奇迹！",
     }
 
     unlocked_names = [ACHIEVEMENTS_INFO[a] for a in achievements if a in ACHIEVEMENTS_INFO]
