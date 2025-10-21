@@ -97,6 +97,21 @@ class MyPlugin(Star):
         user_name = event.get_sender_name()
         user_id = self._get_user_id(event)
 
+        # ——【新增：每天只能签到一次的校验】——
+    today = datetime.now().date().isoformat()
+
+    # 提前拿到用户记录（如果没有就创建），这样后面就能直接复用
+    user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+    # 如果今天已经签过到，就直接提示并 return（不加分、不加玻璃珠）
+    if user.get("last_sign") == today:
+    yield event.plain_result(
+        f"{user_name}，今天已经签过到啦～\n当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
+    )
+    return
+# ——【新增结束】——
+
+
         period = self._time_period()
         pool = {
             "morning": [
@@ -146,10 +161,11 @@ class MyPlugin(Star):
         favor_inc = random.randint(0, 30)
         marbles_inc = random.randint(0, 30)
 
-        user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
         user["favor"] += favor_inc
         user["marbles"] += marbles_inc
+        user["last_sign"] = today  # ——【新增：记录今天已签到】——
         self._save_state()
+
 
         reply = (
             f"{greet}\n"
