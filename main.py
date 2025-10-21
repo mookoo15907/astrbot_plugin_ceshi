@@ -831,22 +831,17 @@ async def check_achievements(self, event: AstrMessageEvent):
 
 
 
-# ---- 开发调试指令：程序员菜单测试（固定掉落一个彩蛋）----
 @filter.command("程序员菜单测试")
 async def dev_force_egg(self, event: AstrMessageEvent):
     """
-    开发者用：固定掉落一个普通彩蛋（n01）
-    用于验证彩蛋系统掉落、奖励与存档逻辑是否正常。
+    开发者用：固定掉落一个普通彩蛋（n01），不依赖内部私有方法。
+    仅用于快速验证：掉落、去重与奖励结算是否正常（不触发成就）。
     """
     user_name = event.get_sender_name()
     user_id = self._get_user_id(event)
     user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
 
-    # 取彩蛋系统中定义的 award 方法来执行奖励逻辑
-    # 这里只固定掉落普通彩蛋 n01
-    egg = ("n01", "【甜甜圈店的奇遇】", "和小碎一起吃到了超棒的草莓燕麦脆珠甜甜圈，意外地在甜甜圈上发现了玻璃珠点缀！", 5, 30)
-
-    # 初始化存档（防止第一次没有彩蛋记录时报错）
+    # 初始化彩蛋存档
     store = self._state.setdefault("eggs", {})
     u = store.setdefault(user_id, {
         "collected": [],
@@ -854,12 +849,28 @@ async def dev_force_egg(self, event: AstrMessageEvent):
         "special_collected": [],
     })
 
-    # 调用通用奖励逻辑
-    res = await self._award_egg_and_achievements(event, user_name, user_id, user, u, egg, rarity_tag="普通彩蛋")
-    if res:
-        yield res
-    else:
-        yield event.plain_result("彩蛋触发测试失败，请检查彩蛋系统是否正确注册。")
+    egg = ("n01", "【甜甜圈店的奇遇】", "和小碎一起吃到了超棒的草莓燕麦脆珠甜甜圈，意外地在甜甜圈上发现了玻璃珠点缀！", 5, 30)
+
+    # 去重：已收集就提示
+    if egg[0] in set(u.get("collected", [])):
+        yield event.plain_result(
+            f"普通彩蛋*{egg[1]}你已经拥有啦～\n"
+            f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+        )
+        return
+
+    # 写入与结算
+    u["collected"].append(egg[0])
+    user["favor"] = user.get("favor", 0) + egg[3]
+    user["marbles"] = user.get("marbles", 0) + egg[4]
+    self._save_state()
+
+    # 展示
+    yield event.plain_result(
+        f"普通彩蛋*{egg[1]}{egg[2]} 小碎好感+{egg[3]}，玻璃珠+{egg[4]}。\n"
+        f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+    )
+
 
 
     
