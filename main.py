@@ -7,6 +7,70 @@ import json
 from pathlib import Path
 from datetime import datetime
 
+    # ---- 新增指令：占卜 ----
+    @filter.command("占卜")
+    async def divination(self, event: AstrMessageEvent):
+        """
+        随机抽取一张 22 大阿卡那（正/逆），
+        先收取 20 玻璃珠占卜费；根据牌面评级决定玻璃珠增减（±266 封顶），
+        好感度额外 +0~50；若为“特别棒”(SSS) 有 10% 概率额外 +999。
+        """
+        user_name = event.get_sender_name()
+        user_id = self._get_user_id(event)
+        user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+        # 1) 扣占卜费
+        fee = 20
+        user["marbles"] = user.get("marbles", 0) - fee
+
+        # 2) 随机牌与正逆
+        card_name = random.choice(list(MAJOR_ARCANA.keys()))
+        upright = random.choice([True, False])
+        orient = "upright" if upright else "reversed"
+        m: ArcMeaning = MAJOR_ARCANA[card_name][orient]
+        orient_cn = "正位" if upright else "逆位"
+
+        # 3) 计算玻璃珠增减（按评级区间）与好感度
+        rmin, rmax = MARBLE_RANGE[m.type]
+        marble_delta = random.randint(rmin, rmax)
+        # clip 到 ±266
+        marble_delta = max(-266, min(266, marble_delta))
+
+        favor_inc = random.randint(0, 50)
+
+        # 4) SSS 额外 10% 中奖 +999
+        bonus_text = ""
+        bonus_delta = 0
+        if m.type == "SSS" and random.random() < 0.10:
+            bonus_delta = 999
+            bonus_text = "\n🎉 中奖时刻！群星垂青，额外获得 **999** 颗玻璃珠！"
+
+        # 5) 更新背包
+        user["favor"] = user.get("favor", 0) + favor_inc
+        user["marbles"] = user.get("marbles", 0) + marble_delta + bonus_delta
+        self._save_state()
+
+        # 6) 展示用的符号
+        def fmt_signed(n: int) -> str:
+            return f"+{n}" if n >= 0 else f"{n}"
+
+        rating_word = RATING_WORD[m.type]
+        keywords = "、".join(m.keywords[:6])
+
+        reply = (
+            f"🔮 我收取了 **{fee}** 枚玻璃珠作为占卜费用……\n"
+            f"✨ 本次是 **{card_name}·{orient_cn}**\n"
+            f"核心：**{m.core}**｜其它：{keywords}\n"
+            f"🔎 解析：{m.interp}\n"
+            f"这是一张**{rating_word}**牌呢。\n"
+            f"💗 小碎好感度 {fmt_signed(favor_inc)}，"
+            f"🫧 玻璃珠 {fmt_signed(marble_delta + bonus_delta)}{bonus_text}\n"
+            f"📦 当前背包｜好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
+        )
+
+        yield event.plain_result(reply)
+
+
 @register("helloworld", "YourName", "一个简单的 Hello World 插件", "1.0.0")
 class MyPlugin(Star):
     def __init__(self, context: Context):
@@ -79,11 +143,11 @@ class MyPlugin(Star):
 
         replies = [
             f"你好呀，{user_name}，小碎在这里～",
-            f"{user_name}，小碎到咯！找我有什么事吗？",
+            f"{user_name}，找我有什么事吗？",
             f"在呢在呢～{user_name}，小碎随时待命！",
-            f"喵？是{user_name}在叫我吗～小碎已上线！",
-            f"嘿嘿，{user_name}，小碎来了！需要帮忙尽管说～",
-            f"报告！{user_name}，小碎就位！(￣▽￣)ゞ"
+            f"怎么了吗？",
+            f"我在(*'▽'*)♪",
+            f"嗨——"
         ]
         yield event.plain_result(random.choice(replies))
 
@@ -112,7 +176,7 @@ class MyPlugin(Star):
                 f"清晨好，{user_name}～来摸摸小碎提提神！",
                 f"小碎送来一杯热可可，{user_name} 早上好！",
                 f"新的一天，从和小碎说早安开始吧，{user_name}～",
-                f"晨光正好，{user_name}～小碎来也！"
+                f"晨光正好，{user_name}～"
             ],
             "noon": [
                 f"午间好，{user_name}～记得补充能量哦！",
@@ -127,7 +191,7 @@ class MyPlugin(Star):
                 f"{user_name}，下午的太阳刚刚好～",
                 f"来点小甜点如何？小碎请你～",
                 f"保持专注，{user_name}～小碎给你打气！",
-                f"嗷呜～{user_name}，小碎在这儿守护你！",
+                f"嗷嗷～{user_name}，小碎在这儿守护你！",
                 f"下午茶时间到～{user_name} 要不要来一口？"
             ],
             "evening": [
@@ -144,7 +208,7 @@ class MyPlugin(Star):
                 f"夜深了，{user_name}～要不要喝点热牛奶？",
                 f"小碎给你盖小被子～{user_name} 晚安前的签到也很可爱！",
                 f"星星眨眼睛～{user_name}，小碎悄悄上线～",
-                f"夜猫小队集合！{user_name}～小碎打卡到！"
+                f"夜猫子小队集合！{user_name}～小碎打卡到！"
             ],
         }
 
@@ -176,6 +240,70 @@ class MyPlugin(Star):
         yield event.plain_result(
             f"{user_name} 的背包：\n好感度：{info['favor']}\n玻璃珠：{info['marbles']}"
         )
+
+        # ---- 新增指令：占卜 ----
+    @filter.command("占卜")
+    async def divination(self, event: AstrMessageEvent):
+        """
+        随机抽取一张 22 大阿卡那（正/逆），
+        先收取 20 玻璃珠占卜费；根据牌面评级决定玻璃珠增减（±266 封顶），
+        好感度额外 +0~50；若为“特别棒”(SSS) 有 10% 概率额外 +999。
+        """
+        user_name = event.get_sender_name()
+        user_id = self._get_user_id(event)
+        user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+        # 1) 扣占卜费
+        fee = 20
+        user["marbles"] = user.get("marbles", 0) - fee
+
+        # 2) 随机牌与正逆
+        card_name = random.choice(list(MAJOR_ARCANA.keys()))
+        upright = random.choice([True, False])
+        orient = "upright" if upright else "reversed"
+        m: ArcMeaning = MAJOR_ARCANA[card_name][orient]
+        orient_cn = "正位" if upright else "逆位"
+
+        # 3) 计算玻璃珠增减（按评级区间）与好感度
+        rmin, rmax = MARBLE_RANGE[m.type]
+        marble_delta = random.randint(rmin, rmax)
+        # clip 到 ±266
+        marble_delta = max(-266, min(266, marble_delta))
+
+        favor_inc = random.randint(0, 50)
+
+        # 4) SSS 额外 10% 中奖 +999
+        bonus_text = ""
+        bonus_delta = 0
+        if m.type == "SSS" and random.random() < 0.10:
+            bonus_delta = 999
+            bonus_text = "\n🎉 中奖时刻！群星垂青，额外获得 **999** 颗玻璃珠！"
+
+        # 5) 更新背包
+        user["favor"] = user.get("favor", 0) + favor_inc
+        user["marbles"] = user.get("marbles", 0) + marble_delta + bonus_delta
+        self._save_state()
+
+        # 6) 展示用的符号
+        def fmt_signed(n: int) -> str:
+            return f"+{n}" if n >= 0 else f"{n}"
+
+        rating_word = RATING_WORD[m.type]
+        keywords = "、".join(m.keywords[:6])
+
+        reply = (
+            f"🔮 我收取了 **{fee}** 枚玻璃珠作为占卜费用……\n"
+            f"✨ 本次是 **{card_name}·{orient_cn}**\n"
+            f"核心：**{m.core}**｜其它：{keywords}\n"
+            f"🔎 解析：{m.interp}\n"
+            f"这是一张**{rating_word}**牌呢。\n"
+            f"💗 小碎好感度 {fmt_signed(favor_inc)}，"
+            f"🫧 玻璃珠 {fmt_signed(marble_delta + bonus_delta)}{bonus_text}\n"
+            f"📦 当前背包｜好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
+        )
+
+        yield event.plain_result(reply)
+
 
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
