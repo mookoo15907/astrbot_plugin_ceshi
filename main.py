@@ -167,7 +167,7 @@ class MyPlugin(Star):
         )
         yield event.plain_result(reply)
 
-        res = await _try_drop_egg(self,event, is_interaction=True)
+        res = await self._try_drop_egg(event, is_interaction=True)
         if res: yield res
 
     
@@ -683,10 +683,10 @@ async def extra_sign_in(self, event: AstrMessageEvent):
 # ==== 彩蛋系统（被动触发 + 成就）========================================
 # 用法（请在以下指令最后面各加一行调用）：
 #   - 在“签到”、“我还要签到”、“占卜”、“投喂”的回复 yield 之后，追加：
-#       res = await _try_drop_egg(self,event, is_interaction=True)
+#       res = await self._try_drop_egg(event, is_interaction=True)
 #       if res: yield res
 #   - 若你有一个“群内任意消息入口”（如总 on_message/默认回调），在合适位置追加：
-#       res = await _try_drop_egg(self,event, is_interaction=False)
+#       res = await self._try_drop_egg(event, is_interaction=False)
 #       if res: yield res
 #
 # 说明：
@@ -803,7 +803,7 @@ async def _try_drop_egg(self, event: AstrMessageEvent, is_interaction: bool) -> 
             pass
         else:
             egg = choice(avail)
-            return await self._award_egg_and_achievements(event, user_name, user_id, user, u, egg, rarity_tag="特别彩蛋")
+            return await _award_egg_and_achievements(self,event, user_name, user_id, user, u, egg, rarity_tag="特别彩蛋")
 
     # 2) 然后判定基础掉落
     if random() >= base_p:
@@ -812,7 +812,7 @@ async def _try_drop_egg(self, event: AstrMessageEvent, is_interaction: bool) -> 
     # 3) 传说彩蛋全局 0.5% 独立触发（若未获得）
     mythic = next((e for e in ULTRA_EGGS if e[0] == "u00"), None)
     if mythic and mythic[0] not in owned and random() < 0.005:
-        return await self._award_egg_and_achievements(event, user_name, user_id, user, u, mythic, rarity_tag="超稀有彩蛋")
+        return await _award_egg_and_achievements(self,event, user_name, user_id, user, u, mythic, rarity_tag="超稀有彩蛋")
 
     # 4) 稀有度权重抽取（可按需微调）
     #    普通 82%，稀有 17%，超稀有 1%
@@ -840,7 +840,7 @@ async def _try_drop_egg(self, event: AstrMessageEvent, is_interaction: bool) -> 
         return None
 
     egg = choice(avail)
-    return await self._award_egg_and_achievements(event, user_name, user_id, user, u, egg, rarity_tag=tag)
+    return await _award_egg_and_achievements(self,event, user_name, user_id, user, u, egg, rarity_tag=tag)
 
 # 负责发放奖励 + 成就检测 + 文案输出
 async def _award_egg_and_achievements(self, event: AstrMessageEvent, user_name: str, user_id: str,
@@ -859,7 +859,7 @@ async def _award_egg_and_achievements(self, event: AstrMessageEvent, user_name: 
     user["marbles"] += int(m_inc)
 
     # 成就检查
-    achieve_msgs = self._check_and_award_achievements(user_name, user_id, user, ustate)
+    achieve_msgs = _check_and_award_achievements(self,user_name, user_id, user, ustate)
 
     # 落盘
     self._save_state()
