@@ -23,11 +23,11 @@ class MyPlugin(Star):
         # 新增：候选回复（5~6 条），触发后随机选一条
         replies = [
             f"你好呀，{user_name}，小碎在这里～",
-            f"{user_name}，小碎到咯！找我有什么事吗？",
+            f"{user_name}，找我有什么事吗？",
             f"在呢在呢～{user_name}，小碎随时待命！",
-            f"喵？是{user_name}在叫我吗～小碎已上线！",
-            f"嘿嘿，{user_name}，小碎来了！需要帮忙的话尽管说～",
-            f"报告！{user_name}，小碎就位！(￣▽￣)ゞ"
+            f"怎么了吗？",
+            f"我在(*'▽'*)♪",
+            f"嗨——"
         ]
         yield event.plain_result(random.choice(replies))  # 随机发送一条
 
