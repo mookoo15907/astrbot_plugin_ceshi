@@ -171,6 +171,7 @@ class MyPlugin(Star):
         if res:
             yield res
 
+
     
     # ---- 新版：占卜（每日一次，内联数据，仅三组牌）----
     @filter.command("占卜")
@@ -383,9 +384,7 @@ class MyPlugin(Star):
         yield event.plain_result(reply)
 
 
-        res = await self._try_drop_egg(event)
-        if res:
-            yield res
+
 
 
 
@@ -504,10 +503,6 @@ class MyPlugin(Star):
         )
         yield event.plain_result(reply)
 
-        res = await self._try_drop_egg(event)
-        if res:
-            yield res
-
 # ---- 新增指令：运势（0与100有特殊奖励）----
 @filter.command("运势")
 async def fortune(self, event: AstrMessageEvent):
@@ -571,9 +566,6 @@ async def fortune(self, event: AstrMessageEvent):
     reply = f"{base_line}\n📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
     yield event.plain_result(reply)
 
-    res = await self._try_drop_egg(event)
-    if res:
-    yield res
 
 
 # ---- 新增指令：我还要签到（九段运势，仅玻璃珠变动，不加好感）----
@@ -689,11 +681,6 @@ async def extra_sign_in(self, event: AstrMessageEvent):
     )
     yield event.plain_result(reply)
 
-    res = await self._try_drop_egg(event)
-    if res:
-        yield res
-
-
 
 # ==== 彩蛋系统（固定 10% 掉落 + 成就）===============================
 # 用法（请在“签到”“我还要签到”“占卜”“投喂”的每个 yield 之后追加）：
@@ -795,8 +782,8 @@ async def _try_drop_egg(self, event: AstrMessageEvent, is_interaction: bool | No
     owned = set(u["collected"])
     owned_special = set(u["special_collected"])
 
-    # ── 概率设定（固定 20%）───────────────────────────────────────────
-    base_p = 0.20
+    # ── 概率设定（固定 10%）───────────────────────────────────────────
+    base_p = 1.00
 
     from random import random, choice
 
@@ -839,8 +826,6 @@ async def _try_drop_egg(self, event: AstrMessageEvent, is_interaction: bool | No
 
     egg = choice(avail)
     return await self._award_egg_and_achievements(event, user_name, user_id, user, u, egg, rarity_tag=tag)
-
-
 
     
 
