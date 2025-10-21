@@ -1069,7 +1069,11 @@ async def egg_detail(self, event: AstrMessageEvent):
     result = "\n".join(reply_lines)
     yield event.plain_result(result)
 
-    
+    @filter.command("掉落测试")
+    async def debug_drop(self, event: AstrMessageEvent):
+        """强制触发一次彩蛋掉落"""
+        await self._try_drop_easter_egg(event, is_interaction=True)
+
 
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
