@@ -28,10 +28,6 @@ class MyPlugin(Star):
         except Exception as e:
             logger.error(f"加载数据失败：{e}")
 
-    
-    # ✅ 在这里调用初始化函数
-    self._ensure_egg_state()
-
     def _save_state(self):
         try:
             self._data_path.write_text(json.dumps(self._state, ensure_ascii=False, indent=2), encoding="utf-8")
