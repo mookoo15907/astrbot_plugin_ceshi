@@ -382,7 +382,8 @@ class MyPlugin(Star):
         yield event.plain_result(reply)
 
 
-
+        res = await _try_drop_egg(self,event, is_interaction=True)
+        if res: yield res
 
 
 
@@ -500,6 +501,10 @@ class MyPlugin(Star):
             f"💗 当前好感度：{user['favor']}"
         )
         yield event.plain_result(reply)
+
+        res = await _try_drop_egg(self,event, is_interaction=True)
+        if res: yield res
+
 
 # ---- 新增指令：运势（0与100有特殊奖励）----
 @filter.command("运势")
@@ -680,6 +685,10 @@ async def extra_sign_in(self, event: AstrMessageEvent):
     yield event.plain_result(reply)
 
 
+    res = await _try_drop_egg(self,event, is_interaction=True)
+    if res: yield res
+
+
 # ==== 彩蛋系统（被动触发 + 成就）========================================
 # 用法（请在以下指令最后面各加一行调用）：
 #   - 在“签到”、“我还要签到”、“占卜”、“投喂”的回复 yield 之后，追加：
@@ -788,8 +797,8 @@ async def _try_drop_egg(self, event: AstrMessageEvent, is_interaction: bool) -> 
     owned_special = set(u["special_collected"])
 
     # ── 概率设定 ──────────────────────────────────────────────────────
-    # 基础掉落概率：互动 15%，普通消息 5%
-    base_p = 1.00 if is_interaction else 0.05
+    # 基础掉落概率：互动 20%，普通消息 5%
+    base_p = 0.20 if is_interaction else 0.05
 
     # 特别彩蛋：固定 10% 独立判定（若命中则直接走特别彩蛋逻辑）
     from random import random, choice
