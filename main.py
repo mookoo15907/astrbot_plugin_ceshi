@@ -167,10 +167,8 @@ class MyPlugin(Star):
         )
         yield event.plain_result(reply)
 
-        res = await self._try_drop_egg(event)
-        if res:
-            yield res
-
+        res = await self._try_drop_egg(event, is_interaction=True)
+        if res: yield res
 
     
     # ---- 新版：占卜（每日一次，内联数据，仅三组牌）----
@@ -682,34 +680,40 @@ async def extra_sign_in(self, event: AstrMessageEvent):
     yield event.plain_result(reply)
 
 
-# ==== 彩蛋系统（固定 10% 掉落 + 成就）===============================
-# 用法（请在“签到”“我还要签到”“占卜”“投喂”的每个 yield 之后追加）：
-#   res = await self._try_drop_egg(event)
-#   if res:
-#       yield res
+# ==== 彩蛋系统（被动触发 + 成就）========================================
+# 用法（请在以下指令最后面各加一行调用）：
+#   - 在“签到”、“我还要签到”、“占卜”、“投喂”的回复 yield 之后，追加：
+#       res = await self._try_drop_egg(event, is_interaction=True)
+#       if res: yield res
+#   - 若你有一个“群内任意消息入口”（如总 on_message/默认回调），在合适位置追加：
+#       res = await self._try_drop_egg(event, is_interaction=False)
+#       if res: yield res
 #
 # 说明：
-# - 统一采用固定 10% 掉落（不再区分“互动 15% / 任意消息 5%”）
-# - 特别彩蛋：固定每次 10% 概率独立判定（若命中则优先掉落特别彩蛋）
-# - 超稀有中存在“传说彩蛋”全局 0.5% 概率（独立判定），奖励 300 好感 + 999 玻璃珠
+# - 群内任意消息：5% 掉落概率
+# - 日常互动（两个签到、占卜、投喂）：15% 掉落概率
+# - 特别彩蛋：固定每次 10% 概率独立判定（若命中则直接掉落特别彩蛋）
+# - 超稀有中有一个“传说彩蛋”全局 0.5% 概率（独立判定），奖励 300 好感 + 999 玻璃珠
 # - 不会掉重复彩蛋；若该稀有度已集齐，会自动回落/上浮到可用的稀有度
 # - 成就：集齐 1/10/25/40/50（全收集）、特别彩蛋全收集；触发即发放奖励
-# ==================================================================
+# ======================================================================
 
-# （放在类里，替换你现有的 _try_drop_egg 函数）
-    # ==== 彩蛋：核心掉落函数（固定 10%） ====
-    async def _try_drop_egg(self, event: AstrMessageEvent, is_interaction: bool | None = None) -> MessageEventResult | None:
-        user_name = event.get_sender_name()
-        user_id = self._get_user_id(event)
-        user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+# （放在类里）
+async def _try_drop_egg(self, event: AstrMessageEvent, is_interaction: bool) -> MessageEventResult | None:
+    user_name = event.get_sender_name()
+    user_id = self._get_user_id(event)
+    user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
 
-        store = self._state.setdefault("eggs", {})
-        u = store.setdefault(user_id, {
-            "collected": [],
-            "achievements": [],
-            "special_collected": [],
-        })
+    # ── 初始化彩蛋/成就存档 ─────────────────────────────────────────────
+    store = self._state.setdefault("eggs", {})
+    u = store.setdefault(user_id, {
+        "collected": [],            # 存放 egg_id 列表（不重复）
+        "achievements": [],         # 已达成成就 key 列表
+        "special_collected": [],    # 已收集的“特别彩蛋” egg_id
+    })
 
+    # ── 定义彩蛋池（每种先给 3 个示例，其余你可继续补充到目标数量）────────
+    # 结构：("id", "标题", "正文内容（不含结尾奖励提示）", favor_delta, marbles_delta)
     NORMAL_EGGS = [
         ("n01", "【甜甜圈店的奇遇】", "和小碎一起吃到了超棒的草莓燕麦脆珠甜甜圈，意外地在甜甜圈上发现了玻璃珠点缀！", 5, 30),
         ("n02", "【便利店的幸运签】", "小碎在发票上刮出了‘再来一瓶’的幸运字样，两人都笑了。", 8, 20),
@@ -779,103 +783,213 @@ async def extra_sign_in(self, event: AstrMessageEvent):
         # TODO: 补充至 10 个特别彩蛋（可按三作继续扩展）
     ]
 
+    # 快速索引：已拥有
+    owned = set(u["collected"])
+    owned_special = set(u["special_collected"])
 
-        owned = set(u["collected"])
-        owned_special = set(u["special_collected"])
+    # ── 概率设定 ──────────────────────────────────────────────────────
+    # 基础掉落概率：互动 15%，普通消息 5%
+    base_p = 1.00 if is_interaction else 0.05
 
-        # 固定 10% 掉落
-        base_p = 1.00  # 你想要更高概率的话，这里可以是 0.20（20%）
+    # 特别彩蛋：固定 10% 独立判定（若命中则直接走特别彩蛋逻辑）
+    from random import random, choice
 
-        from random import random, choice
-
-        # 特别彩蛋独立 10%
-        if random() < 0.10:
-            avail = [e for e in SPECIAL_EGGS if e[0] not in owned_special]
-            if avail:
-                egg = choice(avail)
-                return await self._award_egg_and_achievements(event, user_name, user_id, user, u, egg, rarity_tag="特别彩蛋")
-
-        # 基础判定
-        if random() >= base_p:
-            return None
-
-        # 传说彩蛋 0.5%
-        mythic = next((e for e in ULTRA_EGGS if e[0] == "u00"), None)
-        if mythic and mythic[0] not in owned and random() < 0.005:
-            return await self._award_egg_and_achievements(event, user_name, user_id, user, u, mythic, rarity_tag="超稀有彩蛋")
-
-        roll = random()
-        if roll < 0.82:
-            pool, tag = NORMAL_EGGS, "普通彩蛋"
-        elif roll < 0.99:
-            pool, tag = RARE_EGGS, "稀有彩蛋"
+    # 1) 先判定特别彩蛋（独立）
+    if random() < 0.10:
+        # 可选的特别彩蛋（去重）
+        avail = [e for e in SPECIAL_EGGS if e[0] not in owned_special]
+        if not avail:
+            # 特别彩蛋已集齐，继续进入普通概率流
+            pass
         else:
-            pool, tag = ULTRA_EGGS, "超稀有彩蛋"
+            egg = choice(avail)
+            return await self._award_egg_and_achievements(event, user_name, user_id, user, u, egg, rarity_tag="特别彩蛋")
 
-        avail = [e for e in pool if e[0] not in owned]
-        if not avail:
-            for p, t in ((NORMAL_EGGS, "普通彩蛋"), (RARE_EGGS, "稀有彩蛋"), (ULTRA_EGGS, "超稀有彩蛋")):
-                cand = [e for e in p if e[0] not in owned]
-                if cand:
-                    avail, tag = cand, t
-                    break
-        if not avail:
-            return None
+    # 2) 然后判定基础掉落
+    if random() >= base_p:
+        return None
 
-        egg = choice(avail)
-        return await self._award_egg_and_achievements(event, user_name, user_id, user, u, egg, rarity_tag=tag)
+    # 3) 传说彩蛋全局 0.5% 独立触发（若未获得）
+    mythic = next((e for e in ULTRA_EGGS if e[0] == "u00"), None)
+    if mythic and mythic[0] not in owned and random() < 0.005:
+        return await self._award_egg_and_achievements(event, user_name, user_id, user, u, mythic, rarity_tag="超稀有彩蛋")
 
-    # ==== 彩蛋：发奖 + 成就检查 ====
-    async def _award_egg_and_achievements(self, event: AstrMessageEvent, user_name: str, user_id: str,
-                                          user: dict, ustate: dict, egg_tuple: tuple, rarity_tag: str) -> MessageEventResult:
-        egg_id, title, body, f_inc, m_inc = egg_tuple
-        if rarity_tag == "特别彩蛋":
-            if egg_id not in ustate["special_collected"]:
-                ustate["special_collected"].append(egg_id)
-        if egg_id not in ustate["collected"]:
-            ustate["collected"].append(egg_id)
+    # 4) 稀有度权重抽取（可按需微调）
+    #    普通 82%，稀有 17%，超稀有 1%
+    roll = random()
+    if roll < 0.82:
+        pool, tag = NORMAL_EGGS, "普通彩蛋"
+    elif roll < 0.99:
+        pool, tag = RARE_EGGS, "稀有彩蛋"
+    else:
+        pool, tag = ULTRA_EGGS, "超稀有彩蛋"
 
-        user["favor"] += int(f_inc)
-        user["marbles"] += int(m_inc)
+    # 按稀有度挑未拥有
+    avail = [e for e in pool if e[0] not in owned]
+    # 若该池已空，则尝试回落/上浮寻找可用彩蛋
+    if not avail:
+        fallback_order = [NORMAL_EGGS, RARE_EGGS, ULTRA_EGGS]
+        for p in fallback_order:
+            cand = [e for e in p if e[0] not in owned]
+            if cand:
+                avail = cand
+                tag = "普通彩蛋" if p is NORMAL_EGGS else ("稀有彩蛋" if p is RARE_EGGS else "超稀有彩蛋")
+                break
+    if not avail:
+        # 全部收集完毕则不给重复；可以在此提示“已全收集”
+        return None
 
-        achieve_msgs = self._check_and_award_achievements(user_name, user_id, user, ustate)
-        self._save_state()
+    egg = choice(avail)
+    return await self._award_egg_and_achievements(event, user_name, user_id, user, u, egg, rarity_tag=tag)
 
-        reply = (
-            f"{rarity_tag}*{title}{body} 小碎好感+{f_inc}，玻璃珠+{m_inc}。\n"
-            + ("\n".join(achieve_msgs) + ("\n" if achieve_msgs else ""))
-            + f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+# 负责发放奖励 + 成就检测 + 文案输出
+async def _award_egg_and_achievements(self, event: AstrMessageEvent, user_name: str, user_id: str,
+                                      user: dict, ustate: dict, egg_tuple: tuple, rarity_tag: str) -> MessageEventResult:
+    egg_id, title, body, f_inc, m_inc = egg_tuple
+
+    # 写入收集
+    if rarity_tag == "特别彩蛋":
+        if egg_id not in ustate["special_collected"]:
+            ustate["special_collected"].append(egg_id)
+    if egg_id not in ustate["collected"]:
+        ustate["collected"].append(egg_id)
+
+    # 发奖励
+    user["favor"] += int(f_inc)
+    user["marbles"] += int(m_inc)
+
+    # 成就检查
+    achieve_msgs = self._check_and_award_achievements(user_name, user_id, user, ustate)
+
+    # 落盘
+    self._save_state()
+
+    # 文案（与示例格式一致）
+    reply = (
+        f"{rarity_tag}*{title}{body} 小碎好感+{f_inc}，玻璃珠+{m_inc}。\n"
+        + ("\n".join(achieve_msgs) + ("\n" if achieve_msgs else ""))
+        + f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+    )
+    return event.plain_result(reply)
+
+def _check_and_award_achievements(self, user_name: str, user_id: str, user: dict, ustate: dict) -> list[str]:
+    msgs = []
+    owned = set(ustate.get("collected", []))
+    owned_special = set(ustate.get("special_collected", []))
+    done = set(ustate.get("achievements", []))
+
+    # 成就定义（key, 触发条件函数, 奖励favor, 奖励marbles, 展示名）
+    ACHIEVEMENTS = [
+        ("a01_any_1",    lambda: len(owned) >= 1,   2,   5,   "「小碎的第一颗蛋」 —— 小碎开心地举起它，眼睛闪闪发光。"),
+        ("a02_any_10",   lambda: len(owned) >= 10, 10,  30,   "「彩蛋连连看」 —— 你的篮子叮叮当当，越来越重啦～"),
+        ("a03_any_25",   lambda: len(owned) >= 25, 20,  80,   "「珍重的回忆」 —— 旅程已经过了一半。"),
+        ("a04_any_40",   lambda: len(owned) >= 40, 40, 150,   "「叮咚！小碎的惊喜仓库」 —— 彩蛋多到小碎要数不过来了！"),
+        ("a05_all_50",   lambda: len(owned) >= 50, 100, 500,  "「小碎的终极闪闪收藏」 —— 全部集齐，连星星都在鼓掌～"),
+        ("a06_sp_all",   lambda: len(owned_special) >= 10, 60, 300, "「特别蛋大冒险！」 —— 小碎和你跑遍世界，收集到了所有的奇迹！"),
+    ]
+
+    for key, cond, fav, marb, title in ACHIEVEMENTS:
+        if key not in done and cond():
+            done.add(key)
+            ustate["achievements"] = list(done)
+            user["favor"] += fav
+            user["marbles"] += marb
+            # 小碎恭喜语（全收集与特别全收集更激动一些）
+            if key in ("a05_all_50", "a06_sp_all"):
+                exclaim = "哇——太厉害了！" if key == "a06_sp_all" else "天哪，了不起！"
+                msgs.append(
+                    f"🎖️ {user_name}，恭喜你触发了【{title}】成就！{exclaim}小碎送你 好感+{fav}、玻璃珠+{marb}～"
+                )
+            else:
+                msgs.append(
+                    f"🏅 {user_name}，恭喜你触发了【{title}】成就！小碎送你 好感+{fav}、玻璃珠+{marb}～"
+                )
+
+    return msgs
+
+# ---- 新增指令：查看成就 ----
+@filter.command("查看成就")
+async def check_achievements(self, event: AstrMessageEvent):
+    """查看已解锁的成就与收集进度"""
+    user_name = event.get_sender_name()
+    user_id = self._get_user_id(event)
+    eggs_state = self._state.get("eggs", {})
+    u = eggs_state.get(user_id)
+
+    if not u:
+        yield event.plain_result(f"{user_name} 还没有发现任何彩蛋呢～快去探索看看吧 (๑•̀ㅂ•́)و✧")
+        return
+
+    collected = u.get("collected", [])
+    specials = u.get("special_collected", [])
+    achievements = u.get("achievements", [])
+
+    # 全部成就列表（与彩蛋系统定义保持一致）
+    ACHIEVEMENTS_INFO = {
+        "a01_any_1":  "「小碎的第一颗蛋」 —— 小碎开心地举起它，眼睛闪闪发光。",
+        "a02_any_10": "「彩蛋连连看」 —— 你的篮子叮叮当当，越来越重啦～",
+        "a03_any_25": "「珍重的回忆」 —— 旅程已经过了一半。",
+        "a04_any_40": "「叮咚！小碎的惊喜仓库」 —— 彩蛋多到小碎要数不过来了！",
+        "a05_all_50": "「小碎的终极闪闪收藏」 —— 全部集齐，连星星都在鼓掌～",
+        "a06_sp_all": "「特别蛋大冒险！」 —— 小碎和你跑遍世界，收集到了所有的奇迹！",
+    }
+
+    unlocked_names = [ACHIEVEMENTS_INFO[a] for a in achievements if a in ACHIEVEMENTS_INFO]
+    locked_names = [ACHIEVEMENTS_INFO[a] for a in ACHIEVEMENTS_INFO if a not in achievements]
+
+    reply = (
+        f"📜 小碎的成就册：\n"
+        f"——— 已解锁 ——\n"
+        + (("\n".join(f"✅ {n}" for n in unlocked_names)) if unlocked_names else "暂无成就～\n")
+        + "\n——— 未解锁 ——\n"
+        + (("\n".join(f"🔒 {n}" for n in locked_names)) if locked_names else "全部解锁啦！🌟")
+        + f"\n\n🥚 彩蛋收集进度：{len(collected)}/50"
+        + f"\n✨ 特别彩蛋收集进度：{len(specials)}/10"
+    )
+    yield event.plain_result(reply)
+
+
+
+@filter.command("程序员彩蛋测试")
+async def dev_force_egg(self, event: AstrMessageEvent):
+    """
+    开发者用：固定掉落一个普通彩蛋（n01），不依赖内部私有方法。
+    仅用于快速验证：掉落、去重与奖励结算是否正常（不触发成就）。
+    """
+    user_name = event.get_sender_name()
+    user_id = self._get_user_id(event)
+    user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+    # 初始化彩蛋存档
+    store = self._state.setdefault("eggs", {})
+    u = store.setdefault(user_id, {
+        "collected": [],
+        "achievements": [],
+        "special_collected": [],
+    })
+
+    egg = ("n01", "【甜甜圈店的奇遇】", "和小碎一起吃到了超棒的草莓燕麦脆珠甜甜圈，意外地在甜甜圈上发现了玻璃珠点缀！", 5, 30)
+
+    # 去重：已收集就提示
+    if egg[0] in set(u.get("collected", [])):
+        yield event.plain_result(
+            f"普通彩蛋*{egg[1]}你已经拥有啦～\n"
+            f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
         )
-        return event.plain_result(reply)
+        return
 
-    # ==== 彩蛋：成就逻辑 ====
-    def _check_and_award_achievements(self, user_name: str, user_id: str, user: dict, ustate: dict) -> list[str]:
-        msgs = []
-        owned = set(ustate.get("collected", []))
-        owned_special = set(ustate.get("special_collected", []))
-        done = set(ustate.get("achievements", []))
+    # 写入与结算
+    u["collected"].append(egg[0])
+    user["favor"] = user.get("favor", 0) + egg[3]
+    user["marbles"] = user.get("marbles", 0) + egg[4]
+    self._save_state()
 
-        ACHIEVEMENTS = [
-            ("a01_any_1",    lambda: len(owned) >= 1,   2,   5,   "「小碎的第一颗蛋」 —— 小碎开心地举起它，眼睛闪闪发光。"),
-            ("a02_any_10",   lambda: len(owned) >= 10, 10,  30,   "「彩蛋连连看」 —— 你的篮子叮叮当当，越来越重啦～"),
-            ("a03_any_25",   lambda: len(owned) >= 25, 20,  80,   "「珍重的回忆」 —— 旅程已经过了一半。"),
-            ("a04_any_40",   lambda: len(owned) >= 40, 40, 150,   "「叮咚！小碎的惊喜仓库」 —— 彩蛋多到小碎要数不过来了！"),
-            ("a05_all_50",   lambda: len(owned) >= 50, 100, 500,  "「小碎的终极闪闪收藏」 —— 全部集齐，连星星都在鼓掌～"),
-            ("a06_sp_all",   lambda: len(owned_special) >= 10, 60, 300, "「特别蛋大冒险！」 —— 小碎和你跑遍世界，收集到了所有的奇迹！"),
-        ]
+    # 展示
+    yield event.plain_result(
+        f"普通彩蛋*{egg[1]}{egg[2]} 小碎好感+{egg[3]}，玻璃珠+{egg[4]}。\n"
+        f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+    )
 
-        for key, cond, fav, marb, title in ACHIEVEMENTS:
-            if key not in done and cond():
-                done.add(key)
-                ustate["achievements"] = list(done)
-                user["favor"] += fav
-                user["marbles"] += marb
-                if key in ("a05_all_50", "a06_sp_all"):
-                    exclaim = "哇——太厉害了！" if key == "a06_sp_all" else "天哪，了不起！"
-                    msgs.append(f"🎖️ {user_name}，恭喜你触发了【{title}】成就！{exclaim}小碎送你 好感+{fav}、玻璃珠+{marb}～")
-                else:
-                    msgs.append(f"🏅 {user_name}，恭喜你触发了【{title}】成就！小碎送你 好感+{fav}、玻璃珠+{marb}～")
-        return msgs
 
 
     
