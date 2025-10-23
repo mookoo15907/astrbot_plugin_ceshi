@@ -95,10 +95,6 @@ class MyPlugin(Star):
         user_name = event.get_sender_name()
         user_id = self._get_user_id(event)
 
-
-    # ——【新增：用于记录每天的签到人数】——
-    sign_counts = self._state.setdefault(\"sign_counts\", {})  # { \"YYYY-MM-DD\": int }
-    # ——【新增结束】——
         # ——【新增：每天只能签到一次的校验】——
         today = datetime.now().date().isoformat()
         user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
@@ -107,11 +103,11 @@ class MyPlugin(Star):
                 f"{user_name}，今天已经签过到啦～\n当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
             )
             return
-        # ——【新增结束】——
-    # ——【新增：计算今天的签到名次（仅在未签到分支计算）】——
+    # ——【新增：签到名次计数，成功签到才会使用】——
+    sign_counts = self._state.setdefault("sign_counts", {})  # {"YYYY-MM-DD": int}
     rank_today = sign_counts.get(today, 0) + 1
     # ——【新增结束】——
-
+        # ——【新增结束】——
 
         period = self._time_period()
         pool = {
@@ -166,14 +162,16 @@ class MyPlugin(Star):
         user["favor"] += favor_inc
         user["marbles"] += marbles_inc
         user["last_sign"] = today  # 记录今天已签到
-    # ——【新增：写回当天签到总数】——
-    sign_counts[today] = rank_today
-    # ——【新增结束】——
+        # ——【新增：写回当天签到总数】——
+
+        sign_counts[today] = rank_today
+
+        # ——【新增结束】——
 
         self._save_state()
 
         reply = (
-                    f\"你是今天第{rank_today}位签到的~\n\"
+                    f"你是今天第{rank_today}位签到的~\n"
         f"{greet}\n"
             f"签到成功啦～小碎好感度 +{favor_inc}，小碎赠予你 {marbles_inc} 颗玻璃珠。\n"
             f"当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
