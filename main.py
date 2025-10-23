@@ -95,22 +95,22 @@ async def sign_in(self, event: AstrMessageEvent):
     user_name = event.get_sender_name()
     user_id = self._get_user_id(event)
 
-    # ——【新增：签到计数存储结构】——
-    # 用于记录每天的签到人数：{ "YYYY-MM-DD": int }
-    sign_counts = self._state.setdefault("sign_counts", {})
+    # ——【新增：用于记录每天的签到人数】——
+    sign_counts = self._state.setdefault("sign_counts", {})  # { "YYYY-MM-DD": int }
     # ——【新增结束】——
 
     # ——【新增：每天只能签到一次的校验】——
     today = datetime.now().date().isoformat()
     user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
     if user.get("last_sign") == today:
+        # 已签过到：保持原样回复（不计数、不含排名）
         yield event.plain_result(
             f"{user_name}，今天已经签过到啦～\n当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
         )
         return
     # ——【新增结束】——
 
-    # ——【新增：预计算今天的签到名次，仅在未签到时计算】——
+    # ——【新增：计算今天的签到名次（仅成功签到时生效）】——
     rank_today = sign_counts.get(today, 0) + 1
     # ——【新增结束】——
 
@@ -174,11 +174,9 @@ async def sign_in(self, event: AstrMessageEvent):
 
     self._save_state()
 
-    # ——【新增：最开头先发“第 x 位签到”的提示】——
-    yield event.plain_result(f"你是今天第{rank_today}位签到的~")
-    # ——【新增结束】——
-
+    # ——【修改：将“排名 + 原签到内容”合并为同一条消息】——
     reply = (
+        f"你是今天第{rank_today}位签到的~\n"   # 新增行，合并输出
         f"{greet}\n"
         f"签到成功啦～小碎好感度 +{favor_inc}，小碎赠予你 {marbles_inc} 颗玻璃珠。\n"
         f"当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
@@ -187,6 +185,7 @@ async def sign_in(self, event: AstrMessageEvent):
 
     res = await _try_drop_egg(self,event, is_interaction=True)
     if res: yield res
+
 
     
     # ---- 新版：占卜（每日一次，内联数据，仅三组牌）----
