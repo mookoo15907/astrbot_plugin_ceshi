@@ -103,15 +103,16 @@ class MyPlugin(Star):
                 f"{user_name}，今天已经签过到啦～\n当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
             )
             return
-    # ——【最笨法：统计今天已签到人数作为名次】——
-    users = self._state.get("users", {})
-    signed_today_count = 0
-    for _uid, _u in users.items():
-        if isinstance(_u, dict) and _u.get("last_sign") == today:
-            signed_today_count += 1
-    rank_today = signed_today_count + 1
-    # ——【最笨法结束】——
         # ——【新增结束】——
+        # ——【最笨法：统计今天已签到人数作为名次】——
+        users = self._state.get("users", {})
+        signed_today_count = 0
+        for _uid, _u in users.items():
+            if isinstance(_u, dict) and _u.get("last_sign") == today:
+                signed_today_count += 1
+        rank_today = signed_today_count + 1
+        # ——【最笨法结束】——
+
 
         period = self._time_period()
         pool = {
