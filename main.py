@@ -14,7 +14,7 @@ class MyPlugin(Star):
         # 数据持久化文件：插件同目录 data/xiaosui_state.json
         self._data_dir = Path(__file__).parent / "data"
         self._data_path = self._data_dir / "xiaosui_state.json"
-        self._state = {"users": {, "sign_counts": {}}  # { user_id: {"favor": int, "marbles": int, "last_sign": "YYYY-MM-DD"} }
+        self._state = {"users": {}}  # { user_id: {"favor": int, "marbles": int, "last_sign": "YYYY-MM-DD"} }
 
     async def initialize(self):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
@@ -24,8 +24,6 @@ class MyPlugin(Star):
                 self._state = json.loads(self._data_path.read_text(encoding="utf-8"))
                 if "users" not in self._state:
                     self._state["users"] = {}
-        if "sign_counts" not in self._state:
-            self._state["sign_counts"] = {}
             logger.info("小碎数据已加载")
         except Exception as e:
             logger.error(f"加载数据失败：{e}")
@@ -57,1785 +55,967 @@ class MyPlugin(Star):
             pass
         return f"name::{event.get_sender_name()}"
 
-
-
-    @filter.command("查询甜樱桃巧克力碎布朗尼")
-    async def reply_查询甜樱桃巧克力碎布朗尼(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 五任")
-
-    @filter.command("查询自给自足微波炉")
-    async def reply_查询自给自足微波炉(self, event: AstrMessageEvent):
-        yield event.plain_result("75 已买断")
-
-    @filter.command("查询永远抽不到大奖的摇号机")
-    async def reply_查询永远抽不到大奖的摇号机(self, event: AstrMessageEvent):
-        yield event.plain_result("53 已买断")
-
-    @filter.command("查询偷chi芒果蛋糕的女仆")
-    async def reply_查询偷chi芒果蛋糕的女仆(self, event: AstrMessageEvent):
-        yield event.plain_result("50 未买断")
-
-    @filter.command("查询幸运值满格的书呆子")
-    async def reply_查询幸运值满格的书呆子(self, event: AstrMessageEvent):
-        yield event.plain_result("35 未买断")
-
-    @filter.command("查询编织人类情感的缝纫师")
-    async def reply_查询编织人类情感的缝纫师(self, event: AstrMessageEvent):
-        yield event.plain_result("50 未买断")
-
-    @filter.command("查询送信的云中信使")
-    async def reply_查询送信的云中信使(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断")
-
-    @filter.command("查询喜欢狗尾巴草的三花猫")
-    async def reply_查询喜欢狗尾巴草的三花猫(self, event: AstrMessageEvent):
-        yield event.plain_result("75 已买断 三任")
-
-    @filter.command("查询被欺负的小孩子")
-    async def reply_查询被欺负的小孩子(self, event: AstrMessageEvent):
-        yield event.plain_result("60 已买断")
-
-    @filter.command("查询童年的糖纸小狗")
-    async def reply_查询童年的糖纸小狗(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断")
-
-    @filter.command("查询初春时节的青团")
-    async def reply_查询初春时节的青团(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询焦糖小熊饼干天使")
-    async def reply_查询焦糖小熊饼干天使(self, event: AstrMessageEvent):
-        yield event.plain_result("75 已买断 五任")
-
-    @filter.command("查询晨露味道的花茶")
-    async def reply_查询晨露味道的花茶(self, event: AstrMessageEvent):
-        yield event.plain_result("75 已买断 二任")
-
-    @filter.command("查询幽灵男孩和他的幽灵小狗")
-    async def reply_查询幽灵男孩和他的幽灵小狗(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询海浪纹和鲤鱼旗")
-    async def reply_查询海浪纹和鲤鱼旗(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 五任")
-
-    @filter.command("查询薰衣草味威化饼干")
-    async def reply_查询薰衣草味威化饼干(self, event: AstrMessageEvent):
-        yield event.plain_result("97.5 已买断")
-
-    @filter.command("查询阳光海盐柠檬汽水")
-    async def reply_查询阳光海盐柠檬汽水(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 三任")
-
-    @filter.command("查询桃子气泡酒")
-    async def reply_查询桃子气泡酒(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 二任")
-
-    @filter.command("查询偷跑出来的熊猫")
-    async def reply_查询偷跑出来的熊猫(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询破晓时分的城市天际线")
-    async def reply_查询破晓时分的城市天际线(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 四任")
-
-    @filter.command("查询奶油布丁和木勺子")
-    async def reply_查询奶油布丁和木勺子(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 三任")
-
-    @filter.command("查询甜滋滋的满杯桑椹")
-    async def reply_查询甜滋滋的满杯桑椹(self, event: AstrMessageEvent):
-        yield event.plain_result("38 未买断")
-
-    @filter.command("查询灯会中的狐狸面具")
-    async def reply_查询灯会中的狐狸面具(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询节日专供红豆汤圆")
-    async def reply_查询节日专供红豆汤圆(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询松露巧克力侦探")
-    async def reply_查询松露巧克力侦探(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 五任")
-
-    @filter.command("查询味觉失衡的美食鉴赏家")
-    async def reply_查询味觉失衡的美食鉴赏家(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询蓝莓果酱流心蛋挞")
-    async def reply_查询蓝莓果酱流心蛋挞(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 三任")
-
-    @filter.command("查询云端的摩天轮")
-    async def reply_查询云端的摩天轮(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 二任")
-
-    @filter.command("查询牛油果纪律委员")
-    async def reply_查询牛油果纪律委员(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询米饭爱好者")
-    async def reply_查询米饭爱好者(self, event: AstrMessageEvent):
-        yield event.plain_result("75 已买断 五任")
-
-    @filter.command("查询苹果小画家")
-    async def reply_查询苹果小画家(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询午餐肉三明治")
-    async def reply_查询午餐肉三明治(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 二任")
-
-    @filter.command("查询蜜罐松饼小熊")
-    async def reply_查询蜜罐松饼小熊(self, event: AstrMessageEvent):
-        yield event.plain_result("67.5 已买断 三任")
-
-    @filter.command("查询带有薄荷香气的马卡龙")
-    async def reply_查询带有薄荷香气的马卡龙(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 二任")
-
-    @filter.command("查询永远找不齐拼图碎块的少女")
-    async def reply_查询永远找不齐拼图碎块的少女(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断")
-
-    @filter.command("查询只会做奥利奥大福的甜品社社长")
-    async def reply_查询只会做奥利奥大福的甜品社社长(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 二任")
-
-    @filter.command("查询草莓冰沙小公主")
-    async def reply_查询草莓冰沙小公主(self, event: AstrMessageEvent):
-        yield event.plain_result("105 已买断")
-
-    @filter.command("查询天然呆羊角恶魔")
-    async def reply_查询天然呆羊角恶魔(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询海底鲸鱼和小气泡")
-    async def reply_查询海底鲸鱼和小气泡(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 四任")
-
-    @filter.command("查询夜间偷吃的小鼠")
-    async def reply_查询夜间偷吃的小鼠(self, event: AstrMessageEvent):
-        yield event.plain_result("67.5 已买断")
-
-    @filter.command("查询玩滑板的黑猫")
-    async def reply_查询玩滑板的黑猫(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询三色睡衣小兔")
-    async def reply_查询三色睡衣小兔(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 四任")
-
-    @filter.command("查询熊熊高中生")
-    async def reply_查询熊熊高中生(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询小笼包中国娘")
-    async def reply_查询小笼包中国娘(self, event: AstrMessageEvent):
-        yield event.plain_result("63 已买断 三任")
-
-    @filter.command("查询软面包女仆")
-    async def reply_查询软面包女仆(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 二任")
-
-    @filter.command("查询浅蓝天使小兔")
-    async def reply_查询浅蓝天使小兔(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 二任")
-
-    @filter.command("查询圣诞姜饼人小鹿")
-    async def reply_查询圣诞姜饼人小鹿(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询糖果甜点烘焙师")
-    async def reply_查询糖果甜点烘焙师(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询爱心章鱼烧")
-    async def reply_查询爱心章鱼烧(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 三任")
-
-    @filter.command("查询唱片面包熊熊")
-    async def reply_查询唱片面包熊熊(self, event: AstrMessageEvent):
-        yield event.plain_result("送设 二人共养中")
-
-    @filter.command("查询珍珠椰果醇香奶茶")
-    async def reply_查询珍珠椰果醇香奶茶(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 五任")
-
-    @filter.command("查询夏日的三球冰淇淋")
-    async def reply_查询夏日的三球冰淇淋(self, event: AstrMessageEvent):
-        yield event.plain_result("55 未买断")
-
-    @filter.command("查询元气莓果慕斯蛋糕")
-    async def reply_查询元气莓果慕斯蛋糕(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询人缘很好的蛀牙小美女")
-    async def reply_查询人缘很好的蛀牙小美女(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询菠萝圈和菠萝啤")
-    async def reply_查询菠萝圈和菠萝啤(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断")
-
-    @filter.command("查询命运蘑菇骰子")
-    async def reply_查询命运蘑菇骰子(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断")
-
-    @filter.command("查询企鹅棒冰")
-    async def reply_查询企鹅棒冰(self, event: AstrMessageEvent):
-        yield event.plain_result("67.5 已买断 二任")
-
-    @filter.command("查询抹茶杏仁豆腐")
-    async def reply_查询抹茶杏仁豆腐(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询热腾腾的炸虾天妇罗")
-    async def reply_查询热腾腾的炸虾天妇罗(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询小行星与宇航员")
-    async def reply_查询小行星与宇航员(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询24小时自动贩售机猫猫")
-    async def reply_查询24小时自动贩售机猫猫(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询白色花束和旧邮差")
-    async def reply_查询白色花束和旧邮差(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 二任")
-
-    @filter.command("查询电视机斑点小狗")
-    async def reply_查询电视机斑点小狗(self, event: AstrMessageEvent):
-        yield event.plain_result("55 未买断")
-
-    @filter.command("查询变态痴汉少女")
-    async def reply_查询变态痴汉少女(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询桃子口香糖粘液")
-    async def reply_查询桃子口香糖粘液(self, event: AstrMessageEvent):
-        yield event.plain_result("75 已买断 四任")
-
-    @filter.command("查询绝对优等生")
-    async def reply_查询绝对优等生(self, event: AstrMessageEvent):
-        yield event.plain_result("55 未买断")
-
-    @filter.command("查询美少女格斗家")
-    async def reply_查询美少女格斗家(self, event: AstrMessageEvent):
-        yield event.plain_result("35 未买断")
-
-    @filter.command("查询冬日小松鼠")
-    async def reply_查询冬日小松鼠(self, event: AstrMessageEvent):
-        yield event.plain_result("52.5 已买断 四任")
-
-    @filter.command("查询素食主义关东煮")
-    async def reply_查询素食主义关东煮(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 三任")
-
-    @filter.command("查询易碎玻璃杯/崩塌的情绪")
-    async def reply_查询易碎玻璃杯_崩塌的情绪(self, event: AstrMessageEvent):
-        yield event.plain_result("97.5 已买断 五任")
-
-    @filter.command("查询日系阴郁系少女")
-    async def reply_查询日系阴郁系少女(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 三任")
-
-    @filter.command("查询恶龙公主")
-    async def reply_查询恶龙公主(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询仙人球堕天使")
-    async def reply_查询仙人球堕天使(self, event: AstrMessageEvent):
-        yield event.plain_result("60 已买断 五任")
-
-    @filter.command("查询寒冷地带的羊驼")
-    async def reply_查询寒冷地带的羊驼(self, event: AstrMessageEvent):
-        yield event.plain_result("135 已买断 三任 二人共养中")
-
-    @filter.command("查询审美奇异的废宅少女")
-    async def reply_查询审美奇异的废宅少女(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询永不停止的晚间噪音")
-    async def reply_查询永不停止的晚间噪音(self, event: AstrMessageEvent):
-        yield event.plain_result("50 已买断 五任")
-
-    @filter.command("查询满腹心机的学生会会长")
-    async def reply_查询满腹心机的学生会会长(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询存在于虚实之间的幽灵体")
-    async def reply_查询存在于虚实之间的幽灵体(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 二任")
-
-    @filter.command("查询软软小仓鼠")
-    async def reply_查询软软小仓鼠(self, event: AstrMessageEvent):
-        yield event.plain_result("75 已买断")
-
-    @filter.command("查询无处堆放的城市垃圾")
-    async def reply_查询无处堆放的城市垃圾(self, event: AstrMessageEvent):
-        yield event.plain_result("30 未买断")
-
-    @filter.command("查询黑箱天使")
-    async def reply_查询黑箱天使(self, event: AstrMessageEvent):
-        yield event.plain_result("105 已买断 五任")
-
-    @filter.command("查询新式洋馆鬼屋")
-    async def reply_查询新式洋馆鬼屋(self, event: AstrMessageEvent):
-        yield event.plain_result("80 未买断")
-
-    @filter.command("查询视线集中恶魔小姐")
-    async def reply_查询视线集中恶魔小姐(self, event: AstrMessageEvent):
-        yield event.plain_result("112.5 已买断")
-
-    @filter.command("查询知书达礼外交官")
-    async def reply_查询知书达礼外交官(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断")
-
-    @filter.command("查询蔷薇花嫁1")
-    async def reply_查询蔷薇花嫁1(self, event: AstrMessageEvent):
-        yield event.plain_result("112.5 已买断 五任")
-
-    @filter.command("查询百合花精灵")
-    async def reply_查询百合花精灵(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 四任")
-
-    @filter.command("查询薄荷馅冰皮月饼")
-    async def reply_查询薄荷馅冰皮月饼(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 五任")
-
-    @filter.command("查询春季旅行者")
-    async def reply_查询春季旅行者(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 二任")
-
-    @filter.command("查询小醒")
-    async def reply_查询小醒(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 四任")
-
-    @filter.command("查询悠长假日")
-    async def reply_查询悠长假日(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 二任")
-
-    @filter.command("查询蓝玫瑰小王子")
-    async def reply_查询蓝玫瑰小王子(self, event: AstrMessageEvent):
-        yield event.plain_result("80 未买断")
-
-    @filter.command("查询毛绒小熊学生妹")
-    async def reply_查询毛绒小熊学生妹(self, event: AstrMessageEvent):
-        yield event.plain_result("55 未买断 二任")
-
-    @filter.command("查询面包店店员勤恳工作中")
-    async def reply_查询面包店店员勤恳工作中(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 五任")
-
-    @filter.command("查询小怕")
-    async def reply_查询小怕(self, event: AstrMessageEvent):
-        yield event.plain_result("125 未买断")
-
-    @filter.command("查询春日的绿樱桃")
-    async def reply_查询春日的绿樱桃(self, event: AstrMessageEvent):
-        yield event.plain_result("60 已买断")
-
-    @filter.command("查询美术生与三原色")
-    async def reply_查询美术生与三原色(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询南瓜瑞士卷")
-    async def reply_查询南瓜瑞士卷(self, event: AstrMessageEvent):
-        yield event.plain_result("75 已买断")
-
-    @filter.command("查询万福招财猫")
-    async def reply_查询万福招财猫(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 三任")
-
-    @filter.command("查询羊羊天使")
-    async def reply_查询羊羊天使(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断 五任")
-
-    @filter.command("查询杀人兔")
-    async def reply_查询杀人兔(self, event: AstrMessageEvent):
-        yield event.plain_result("30 已买断")
-
-    @filter.command("查询通灵少女")
-    async def reply_查询通灵少女(self, event: AstrMessageEvent):
-        yield event.plain_result("30 已买断")
-
-    @filter.command("查询音乐极端分子")
-    async def reply_查询音乐极端分子(self, event: AstrMessageEvent):
-        yield event.plain_result("30 已买断 二任")
-
-    @filter.command("查询三只眼恶魔")
-    async def reply_查询三只眼恶魔(self, event: AstrMessageEvent):
-        yield event.plain_result("20 未买断")
-
-    @filter.command("查询小厨娘天使")
-    async def reply_查询小厨娘天使(self, event: AstrMessageEvent):
-        yield event.plain_result("20 未买断")
-
-    @filter.command("查询心情外显")
-    async def reply_查询心情外显(self, event: AstrMessageEvent):
-        yield event.plain_result("20 未买断")
-
-    @filter.command("查询流浪小狗")
-    async def reply_查询流浪小狗(self, event: AstrMessageEvent):
-        yield event.plain_result("20 未买断")
-
-    @filter.command("查询新型AI机械姬")
-    async def reply_查询新型AI机械姬(self, event: AstrMessageEvent):
-        yield event.plain_result("30 已买断 二任")
-
-    @filter.command("查询黑猫猫店长")
-    async def reply_查询黑猫猫店长(self, event: AstrMessageEvent):
-        yield event.plain_result("20 未买断")
-
-    @filter.command("查询秋日落叶")
-    async def reply_查询秋日落叶(self, event: AstrMessageEvent):
-        yield event.plain_result("20 未买断")
-
-    @filter.command("查询春日游园")
-    async def reply_查询春日游园(self, event: AstrMessageEvent):
-        yield event.plain_result("25 未买断")
-
-    @filter.command("查询冰雪兔")
-    async def reply_查询冰雪兔(self, event: AstrMessageEvent):
-        yield event.plain_result("25 未买断")
-
-    @filter.command("查询绿林精灵")
-    async def reply_查询绿林精灵(self, event: AstrMessageEvent):
-        yield event.plain_result("25 未买断")
-
-    @filter.command("查询蛋黄猫猫")
-    async def reply_查询蛋黄猫猫(self, event: AstrMessageEvent):
-        yield event.plain_result("25 无psd 已买断 三任")
-
-    @filter.command("查询巧克力甜甜圈")
-    async def reply_查询巧克力甜甜圈(self, event: AstrMessageEvent):
-        yield event.plain_result("37.5 已买断 三任")
-
-    @filter.command("查询牧场花花")
-    async def reply_查询牧场花花(self, event: AstrMessageEvent):
-        yield event.plain_result("25 未买断")
-
-    @filter.command("查询青苹果")
-    async def reply_查询青苹果(self, event: AstrMessageEvent):
-        yield event.plain_result("60 未买断")
-
-    @filter.command("查询小老虎")
-    async def reply_查询小老虎(self, event: AstrMessageEvent):
-        yield event.plain_result("45 已买断")
-
-    @filter.command("查询兔子玩偶祭品")
-    async def reply_查询兔子玩偶祭品(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 四任")
-
-    @filter.command("查询黄草莓酱烤猫咪")
-    async def reply_查询黄草莓酱烤猫咪(self, event: AstrMessageEvent):
-        yield event.plain_result("80 未买断")
-
-    @filter.command("查询天国花束")
-    async def reply_查询天国花束(self, event: AstrMessageEvent):
-        yield event.plain_result("130 未买断")
-
-    @filter.command("查询日式酱油丸子")
-    async def reply_查询日式酱油丸子(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询巫女纸人")
-    async def reply_查询巫女纸人(self, event: AstrMessageEvent):
-        yield event.plain_result("90 已买断 五任")
-
-    @filter.command("查询柠檬片小鼠")
-    async def reply_查询柠檬片小鼠(self, event: AstrMessageEvent):
-        yield event.plain_result("45 已买断 二任")
-
-    @filter.command("查询油菜花小羊")
-    async def reply_查询油菜花小羊(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断")
-
-    @filter.command("查询鲜奶华夫")
-    async def reply_查询鲜奶华夫(self, event: AstrMessageEvent):
-        yield event.plain_result("60 已买断")
-
-    @filter.command("查询小狸猫")
-    async def reply_查询小狸猫(self, event: AstrMessageEvent):
-        yield event.plain_result("60 已买断 五任")
-
-    @filter.command("查询田园少女和蛋黄小鸡")
-    async def reply_查询田园少女和蛋黄小鸡(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 二任")
-
-    @filter.command("查询影楼模特")
-    async def reply_查询影楼模特(self, event: AstrMessageEvent):
-        yield event.plain_result("30 未买断")
-
-    @filter.command("查询雪花雪花")
-    async def reply_查询雪花雪花(self, event: AstrMessageEvent):
-        yield event.plain_result("60 已买断")
-
-    @filter.command("查询棕色小狗天使")
-    async def reply_查询棕色小狗天使(self, event: AstrMessageEvent):
-        yield event.plain_result("80 未买断")
-
-    @filter.command("查询猫猫酷妹")
-    async def reply_查询猫猫酷妹(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断")
-
-    @filter.command("查询酒心巧克力")
-    async def reply_查询酒心巧克力(self, event: AstrMessageEvent):
-        yield event.plain_result("70 未买断")
-
-    @filter.command("查询雨衣小猫")
-    async def reply_查询雨衣小猫(self, event: AstrMessageEvent):
-        yield event.plain_result("60 已买断")
-
-    @filter.command("查询音符鸟")
-    async def reply_查询音符鸟(self, event: AstrMessageEvent):
-        yield event.plain_result("40 未买断")
-
-    @filter.command("查询鸭鸭")
-    async def reply_查询鸭鸭(self, event: AstrMessageEvent):
-        yield event.plain_result("40 未买断")
-
-    @filter.command("查询体感缺失街头少女")
-    async def reply_查询体感缺失街头少女(self, event: AstrMessageEvent):
-        yield event.plain_result("97.5 已买断 三任")
-
-    @filter.command("查询香蕉小猴炸弹")
-    async def reply_查询香蕉小猴炸弹(self, event: AstrMessageEvent):
-        yield event.plain_result("60 已买断 四任")
-
-    @filter.command("查询薄荷漏斗巧克力")
-    async def reply_查询薄荷漏斗巧克力(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 二任")
-
-    @filter.command("查询梦境寄信")
-    async def reply_查询梦境寄信(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 四任")
-
-    @filter.command("查询棉花娃娃")
-    async def reply_查询棉花娃娃(self, event: AstrMessageEvent):
-        yield event.plain_result("40 未买断")
-
-    @filter.command("查询少女的布偶屋")
-    async def reply_查询少女的布偶屋(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 三任")
-
-    @filter.command("查询毛绒兔")
-    async def reply_查询毛绒兔(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 五任")
-
-    @filter.command("查询致幻毒蘑菇")
-    async def reply_查询致幻毒蘑菇(self, event: AstrMessageEvent):
-        yield event.plain_result("40 未买断")
-
-    @filter.command("查询炼乳草莓")
-    async def reply_查询炼乳草莓(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 五任")
-
-    @filter.command("查询芝士猫薄荷")
-    async def reply_查询芝士猫薄荷(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 二任")
-
-    @filter.command("查询拇指多肉")
-    async def reply_查询拇指多肉(self, event: AstrMessageEvent):
-        yield event.plain_result("40 未买断")
-
-    @filter.command("查询日式清汤杯面")
-    async def reply_查询日式清汤杯面(self, event: AstrMessageEvent):
-        yield event.plain_result("80 未买断")
-
-    @filter.command("查询红苹果熊熊果冻")
-    async def reply_查询红苹果熊熊果冻(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 五任")
-
-    @filter.command("查询小奶牛")
-    async def reply_查询小奶牛(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 四任")
-
-    @filter.command("查询骷髅小恶魔")
-    async def reply_查询骷髅小恶魔(self, event: AstrMessageEvent):
-        yield event.plain_result("80 未买断")
-
-    @filter.command("查询熊熊导游")
-    async def reply_查询熊熊导游(self, event: AstrMessageEvent):
-        yield event.plain_result("67.5 已买断 四任")
-
-    @filter.command("查询海鲜寿司")
-    async def reply_查询海鲜寿司(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 五任")
-
-    @filter.command("查询定制祈")
-    async def reply_查询定制祈(self, event: AstrMessageEvent):
-        yield event.plain_result("原设无身价 身价即稿价喔 二任")
-
-    @filter.command("查询春天的和果子")
-    async def reply_查询春天的和果子(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 三任")
-
-    @filter.command("查询烤面包机")
-    async def reply_查询烤面包机(self, event: AstrMessageEvent):
-        yield event.plain_result("60 已买断 三任")
-
-    @filter.command("查询独角兽小马")
-    async def reply_查询独角兽小马(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询冰蓝小兔")
-    async def reply_查询冰蓝小兔(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询学园荔枝")
-    async def reply_查询学园荔枝(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 一任 共养中")
-
-    @filter.command("查询婚礼与钻石")
-    async def reply_查询婚礼与钻石(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询电子机械娘")
-    async def reply_查询电子机械娘(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 四任")
-
-    @filter.command("查询陶瓷猫")
-    async def reply_查询陶瓷猫(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断")
-
-    @filter.command("查询染血熊")
-    async def reply_查询染血熊(self, event: AstrMessageEvent):
-        yield event.plain_result("60 已买断 二任")
-
-    @filter.command("查询茶道")
-    async def reply_查询茶道(self, event: AstrMessageEvent):
-        yield event.plain_result("60 已买断")
-
-    @filter.command("查询魔法小兔")
-    async def reply_查询魔法小兔(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 三任")
-
-    @filter.command("查询荧光水母")
-    async def reply_查询荧光水母(self, event: AstrMessageEvent):
-        yield event.plain_result("67.5 已买断 三任")
-
-    @filter.command("查询纯情魅魔")
-    async def reply_查询纯情魅魔(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 二任")
-
-    @filter.command("查询家居狐狸")
-    async def reply_查询家居狐狸(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询铃铛斑点鹿")
-    async def reply_查询铃铛斑点鹿(self, event: AstrMessageEvent):
-        yield event.plain_result("80 未买断")
-
-    @filter.command("查询章鱼寄生")
-    async def reply_查询章鱼寄生(self, event: AstrMessageEvent):
-        yield event.plain_result("80 未买断")
-
-    @filter.command("查询樱桃布丁小兔")
-    async def reply_查询樱桃布丁小兔(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 二任")
-
-    @filter.command("查询新生代小偶像")
-    async def reply_查询新生代小偶像(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询奶酪松鼠")
-    async def reply_查询奶酪松鼠(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 二任")
-
-    @filter.command("查询蓝玫瑰庭园")
-    async def reply_查询蓝玫瑰庭园(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询新手巫女")
-    async def reply_查询新手巫女(self, event: AstrMessageEvent):
-        yield event.plain_result("62.5 已买断 五任")
-
-    @filter.command("查询蓝莓国的神")
-    async def reply_查询蓝莓国的神(self, event: AstrMessageEvent):
-        yield event.plain_result("67.5 已买断 二任")
-
-    @filter.command("查询谋杀金鱼")
-    async def reply_查询谋杀金鱼(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 五任")
-
-    @filter.command("查询猫咪甜心")
-    async def reply_查询猫咪甜心(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 五任")
-
-    @filter.command("查询缝补小兔")
-    async def reply_查询缝补小兔(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询非常像学生的掌管人间爱意的神")
-    async def reply_查询非常像学生的掌管人间爱意的神(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 二任")
-
-    @filter.command("查询金钱豹辣妹")
-    async def reply_查询金钱豹辣妹(self, event: AstrMessageEvent):
-        yield event.plain_result("100 未买断")
-
-    @filter.command("查询蓝色史莱姆果冻")
-    async def reply_查询蓝色史莱姆果冻(self, event: AstrMessageEvent):
-        yield event.plain_result("80 未买断")
-
-    @filter.command("查询蔷薇花嫁2")
-    async def reply_查询蔷薇花嫁2(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询口蘑小花")
-    async def reply_查询口蘑小花(self, event: AstrMessageEvent):
-        yield event.plain_result("150 已买断 二任")
-
-    @filter.command("查询水饺厨娘")
-    async def reply_查询水饺厨娘(self, event: AstrMessageEvent):
-        yield event.plain_result("45 未买断")
-
-    @filter.command("查询潜在性死亡少女")
-    async def reply_查询潜在性死亡少女(self, event: AstrMessageEvent):
-        yield event.plain_result("62.5 已买断 三任")
-
-    @filter.command("查询扑克垂耳兔")
-    async def reply_查询扑克垂耳兔(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 三任")
-
-    @filter.command("查询薄荷柠檬奶油兔")
-    async def reply_查询薄荷柠檬奶油兔(self, event: AstrMessageEvent):
-        yield event.plain_result("75 已买断 三任")
-
-    @filter.command("查询星星猫头鹰")
-    async def reply_查询星星猫头鹰(self, event: AstrMessageEvent):
-        yield event.plain_result("200 未买断")
-
-    @filter.command("查询曲奇小饼干")
-    async def reply_查询曲奇小饼干(self, event: AstrMessageEvent):
-        yield event.plain_result("210 已买断 共养中")
-
-    @filter.command("查询波点宅宅猫")
-    async def reply_查询波点宅宅猫(self, event: AstrMessageEvent):
-        yield event.plain_result("375 已买断 二任")
-
-    @filter.command("查询樱花白狐")
-    async def reply_查询樱花白狐(self, event: AstrMessageEvent):
-        yield event.plain_result("225 已买断 五任")
-
-    @filter.command("查询透明雨衣")
-    async def reply_查询透明雨衣(self, event: AstrMessageEvent):
-        yield event.plain_result("280 未买断")
-
-    @filter.command("查询白蜡烛")
-    async def reply_查询白蜡烛(self, event: AstrMessageEvent):
-        yield event.plain_result("350 已买断 二任")
-
-    @filter.command("查询红眼黑蛛")
-    async def reply_查询红眼黑蛛(self, event: AstrMessageEvent):
-        yield event.plain_result("100 未买断")
-
-    @filter.command("查询闪闪蜻蜓")
-    async def reply_查询闪闪蜻蜓(self, event: AstrMessageEvent):
-        yield event.plain_result("187.5 已买断")
-
-    @filter.command("查询小黄鸭")
-    async def reply_查询小黄鸭(self, event: AstrMessageEvent):
-        yield event.plain_result("150 已买断 三任")
-
-    @filter.command("查询隐藏面布偶熊")
-    async def reply_查询隐藏面布偶熊(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 二任")
-
-    @filter.command("查询定制护士小兔")
-    async def reply_查询定制护士小兔(self, event: AstrMessageEvent):
-        yield event.plain_result("230 不用买断")
-
-    @filter.command("查询定制古风少年")
-    async def reply_查询定制古风少年(self, event: AstrMessageEvent):
-        yield event.plain_result("是送设哦＞＜")
-
-    @filter.command("查询另类恶魔")
-    async def reply_查询另类恶魔(self, event: AstrMessageEvent):
-        yield event.plain_result("200 已买断 四任")
-
-    @filter.command("查询幼稚园斑点狗")
-    async def reply_查询幼稚园斑点狗(self, event: AstrMessageEvent):
-        yield event.plain_result("240 已买断")
-
-    @filter.command("查询糖果世界")
-    async def reply_查询糖果世界(self, event: AstrMessageEvent):
-        yield event.plain_result("67 未买断")
-
-    @filter.command("查询无限生命药瓶")
-    async def reply_查询无限生命药瓶(self, event: AstrMessageEvent):
-        yield event.plain_result("220 已买断 四任")
-
-    @filter.command("查询小女仆黑猫")
-    async def reply_查询小女仆黑猫(self, event: AstrMessageEvent):
-        yield event.plain_result("240 已买断 四任")
-
-    @filter.command("查询北极熊玩偶")
-    async def reply_查询北极熊玩偶(self, event: AstrMessageEvent):
-        yield event.plain_result("400 已买断 三任")
-
-    @filter.command("查询卡路里面包兔")
-    async def reply_查询卡路里面包兔(self, event: AstrMessageEvent):
-        yield event.plain_result("280 已买断 二任")
-
-    @filter.command("查询小短腿柯基")
-    async def reply_查询小短腿柯基(self, event: AstrMessageEvent):
-        yield event.plain_result("设主是燕咪～抽送 原设无偿 不用买断")
-
-    @filter.command("查询藤川碎")
-    async def reply_查询藤川碎(self, event: AstrMessageEvent):
-        yield event.plain_result("是我哦(*'▽'*)♪我现任设主：云云 已买断")
-
-    @filter.command("查询苍白天国")
-    async def reply_查询苍白天国(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 五任")
-
-    @filter.command("查询定制紫色章鱼小花")
-    async def reply_查询定制紫色章鱼小花(self, event: AstrMessageEvent):
-        yield event.plain_result("135 无需买断")
-
-    @filter.command("查询定制浪花彩虹")
-    async def reply_查询定制浪花彩虹(self, event: AstrMessageEvent):
-        yield event.plain_result("90 无需买断")
-
-    @filter.command("查询定制中二龙")
-    async def reply_查询定制中二龙(self, event: AstrMessageEvent):
-        yield event.plain_result("90 无需买断")
-
-    @filter.command("查询定制异瞳白猫")
-    async def reply_查询定制异瞳白猫(self, event: AstrMessageEvent):
-        yield event.plain_result("90 无需买断")
-
-    @filter.command("查询陶瓷猫猫")
-    async def reply_查询陶瓷猫猫(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断 二任")
-
-    @filter.command("查询气球猫营业员")
-    async def reply_查询气球猫营业员(self, event: AstrMessageEvent):
-        yield event.plain_result("225 已买断 五任")
-
-    @filter.command("查询千原一")
-    async def reply_查询千原一(self, event: AstrMessageEvent):
-        yield event.plain_result("是俺之前的自设(｡ˇε ˇ｡）")
-
-    @filter.command("查询骰子兔子小姐")
-    async def reply_查询骰子兔子小姐(self, event: AstrMessageEvent):
-        yield event.plain_result("80 未买断")
-
-    @filter.command("查询草莓奶油小方")
-    async def reply_查询草莓奶油小方(self, event: AstrMessageEvent):
-        yield event.plain_result("设主是芝士～属于福利设哦(*'▽'*)♪")
-
-    @filter.command("查询酸奶产出者")
-    async def reply_查询酸奶产出者(self, event: AstrMessageEvent):
-        yield event.plain_result("25 未买断")
-
-    @filter.command("查询奶油面包")
-    async def reply_查询奶油面包(self, event: AstrMessageEvent):
-        yield event.plain_result("设主是芝士～是无偿赠送哦(*'▽'*)♪")
-
-    @filter.command("查询校园第十三条怪谈")
-    async def reply_查询校园第十三条怪谈(self, event: AstrMessageEvent):
-        yield event.plain_result("350 已买断 四任")
-
-    @filter.command("查询定制猫烤布丁")
-    async def reply_查询定制猫烤布丁(self, event: AstrMessageEvent):
-        yield event.plain_result("50 无需买断")
-
-    @filter.command("查询定制绿毛白花少女")
-    async def reply_查询定制绿毛白花少女(self, event: AstrMessageEvent):
-        yield event.plain_result("90 无需买断")
-
-    @filter.command("查询云际的丹顶鹤")
-    async def reply_查询云际的丹顶鹤(self, event: AstrMessageEvent):
-        yield event.plain_result("384 已买断 四任")
-
-    @filter.command("查询樱花色富士山和猫")
-    async def reply_查询樱花色富士山和猫(self, event: AstrMessageEvent):
-        yield event.plain_result("570 已买断 三任")
-
-    @filter.command("查询碎花白狼")
-    async def reply_查询碎花白狼(self, event: AstrMessageEvent):
-        yield event.plain_result("150 已买断 四任")
-
-    @filter.command("查询定制网瘾企鹅少女")
-    async def reply_查询定制网瘾企鹅少女(self, event: AstrMessageEvent):
-        yield event.plain_result("50 无需买断 五任")
-
-    @filter.command("查询干花水信玄饼")
-    async def reply_查询干花水信玄饼(self, event: AstrMessageEvent):
-        yield event.plain_result("535 已买断 五任")
-
-    @filter.command("查询化学系医师")
-    async def reply_查询化学系医师(self, event: AstrMessageEvent):
-        yield event.plain_result("580 已买断 五任")
-
-    @filter.command("查询堂食大阪烧")
-    async def reply_查询堂食大阪烧(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断 五任")
-
-    @filter.command("查询网页访问出错喵")
-    async def reply_查询网页访问出错喵(self, event: AstrMessageEvent):
-        yield event.plain_result("510 已买断 五任")
-
-    @filter.command("查询海水煎蛋")
-    async def reply_查询海水煎蛋(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断")
-
-    @filter.command("查询音乐社团吉他手")
-    async def reply_查询音乐社团吉他手(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断 四任")
-
-    @filter.command("查询电波狐狸风纪委员")
-    async def reply_查询电波狐狸风纪委员(self, event: AstrMessageEvent):
-        yield event.plain_result("400 已买断 四任")
-
-    @filter.command("查询四四四小兔")
-    async def reply_查询四四四小兔(self, event: AstrMessageEvent):
-        yield event.plain_result("是送设哦(๑°3°๑)")
-
-    @filter.command("查询鲜虾乌冬")
-    async def reply_查询鲜虾乌冬(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断 五任")
-
-    @filter.command("查询随机参数")
-    async def reply_查询随机参数(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断 三任")
-
-    @filter.command("查询幻想的一天")
-    async def reply_查询幻想的一天(self, event: AstrMessageEvent):
-        yield event.plain_result("100 未买断")
-
-    @filter.command("查询抹茶奶油猫猫")
-    async def reply_查询抹茶奶油猫猫(self, event: AstrMessageEvent):
-        yield event.plain_result("150 已买断")
-
-    @filter.command("查询甜甜圈小狗")
-    async def reply_查询甜甜圈小狗(self, event: AstrMessageEvent):
-        yield event.plain_result("是送给城城的设～(๑°3°๑)")
-
-    @filter.command("查询街边的塑料袋")
-    async def reply_查询街边的塑料袋(self, event: AstrMessageEvent):
-        yield event.plain_result("150 已买断 四任")
-
-    @filter.command("查询灾厄社畜")
-    async def reply_查询灾厄社畜(self, event: AstrMessageEvent):
-        yield event.plain_result("120 已买断")
-
-    @filter.command("查询海域行空")
-    async def reply_查询海域行空(self, event: AstrMessageEvent):
-        yield event.plain_result("470 已买断 四任")
-
-    @filter.command("查询困困草莓")
-    async def reply_查询困困草莓(self, event: AstrMessageEvent):
-        yield event.plain_result("150 已买断 五任")
-
-    @filter.command("查询恋爱乙女")
-    async def reply_查询恋爱乙女(self, event: AstrMessageEvent):
-        yield event.plain_result("是抽送设哦(*´﹃｀*)")
-
-    @filter.command("查询普通人类女仆")
-    async def reply_查询普通人类女仆(self, event: AstrMessageEvent):
-        yield event.plain_result("430 已买断 三任")
-
-    @filter.command("查询孕育兔苗")
-    async def reply_查询孕育兔苗(self, event: AstrMessageEvent):
-        yield event.plain_result("430 已买断 三任 小葵和修修共养中～")
-
-    @filter.command("查询老式蟹黄汤包")
-    async def reply_查询老式蟹黄汤包(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断 二任")
-
-    @filter.command("查询宝箱怪boss")
-    async def reply_查询宝箱怪boss(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断 三任")
-
-    @filter.command("查询变质便当")
-    async def reply_查询变质便当(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断 三任")
-
-    @filter.command("查询烘焙于我")
-    async def reply_查询烘焙于我(self, event: AstrMessageEvent):
-        yield event.plain_result("450 已买断 五任")
-
-    @filter.command("查询雾气云")
-    async def reply_查询雾气云(self, event: AstrMessageEvent):
-        yield event.plain_result("120 未买断")
-
-    @filter.command("查询炼狱草莓酒")
-    async def reply_查询炼狱草莓酒(self, event: AstrMessageEvent):
-        yield event.plain_result("225 已买断 五任")
-
-    @filter.command("查询桃浆制品")
-    async def reply_查询桃浆制品(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断 三任")
-
-    @filter.command("查询病理之爱")
-    async def reply_查询病理之爱(self, event: AstrMessageEvent):
-        yield event.plain_result("700 已买断 四任")
-
-    @filter.command("查询童心小熊")
-    async def reply_查询童心小熊(self, event: AstrMessageEvent):
-        yield event.plain_result("是送设哦(≧∇≦)")
-
-    @filter.command("查询唯一的朋友")
-    async def reply_查询唯一的朋友(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断")
-
-    @filter.command("查询皮格马利翁之帽")
-    async def reply_查询皮格马利翁之帽(self, event: AstrMessageEvent):
-        yield event.plain_result("是群福利抽送设哦～")
-
-    @filter.command("查询程序侵入")
-    async def reply_查询程序侵入(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断")
-
-    @filter.command("查询谜题猫猫")
-    async def reply_查询谜题猫猫(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断 四任")
-
-    @filter.command("查询通勤瓢虫")
-    async def reply_查询通勤瓢虫(self, event: AstrMessageEvent):
-        yield event.plain_result("180 已买断 五任")
-
-    @filter.command("查询噩梦小鬼")
-    async def reply_查询噩梦小鬼(self, event: AstrMessageEvent):
-        yield event.plain_result("600 已买断 三任")
-
-    @filter.command("查询鲨鲨宅")
-    async def reply_查询鲨鲨宅(self, event: AstrMessageEvent):
-        yield event.plain_result("225 已买断")
-
-    @filter.command("查询外星小兔")
-    async def reply_查询外星小兔(self, event: AstrMessageEvent):
-        yield event.plain_result("600 已买断 四任")
-
-    @filter.command("查询幻想中的玫瑰花")
-    async def reply_查询幻想中的玫瑰花(self, event: AstrMessageEvent):
-        yield event.plain_result("225 已买断 四任")
-
-    @filter.command("查询棋局之间")
-    async def reply_查询棋局之间(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 二任")
-
-    @filter.command("查询瓷")
-    async def reply_查询瓷(self, event: AstrMessageEvent):
-        yield event.plain_result("225 已买断 三任")
-
-    @filter.command("查询渐变云层小狐狸")
-    async def reply_查询渐变云层小狐狸(self, event: AstrMessageEvent):
-        yield event.plain_result("225 已买断 二任")
-
-    @filter.command("查询田园花圃")
-    async def reply_查询田园花圃(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 二任")
-
-    @filter.command("查询哭泣小兔")
-    async def reply_查询哭泣小兔(self, event: AstrMessageEvent):
-        yield event.plain_result("37.5 已买断 二人共养中")
-
-    @filter.command("查询认真的恶魔酱")
-    async def reply_查询认真的恶魔酱(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 五任")
-
-    @filter.command("查询电子彩虹猫")
-    async def reply_查询电子彩虹猫(self, event: AstrMessageEvent):
-        yield event.plain_result("520 已买断 三任")
-
-    @filter.command("查询天空塔")
-    async def reply_查询天空塔(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 五任")
-
-    @filter.command("查询药物博士")
-    async def reply_查询药物博士(self, event: AstrMessageEvent):
-        yield event.plain_result("225 已买断 三任")
-
-    @filter.command("查询莓果兔")
-    async def reply_查询莓果兔(self, event: AstrMessageEvent):
-        yield event.plain_result("是送设喔(*'▽'*)♪ 二任")
-
-    @filter.command("查询缤纷下午茶")
-    async def reply_查询缤纷下午茶(self, event: AstrMessageEvent):
-        yield event.plain_result("240 已买断 四任 二人共养中")
-
-    @filter.command("查询恶魔的注视")
-    async def reply_查询恶魔的注视(self, event: AstrMessageEvent):
-        yield event.plain_result("240 已买断 五任")
-
-    @filter.command("查询融化飞蛾")
-    async def reply_查询融化飞蛾(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 二任")
-
-    @filter.command("查询霓虹日和")
-    async def reply_查询霓虹日和(self, event: AstrMessageEvent):
-        yield event.plain_result("240 已买断 三任")
-
-    @filter.command("查询虚拟的歌唱家")
-    async def reply_查询虚拟的歌唱家(self, event: AstrMessageEvent):
-        yield event.plain_result("240 已买断 五任")
-
-    @filter.command("查询鱼类真主")
-    async def reply_查询鱼类真主(self, event: AstrMessageEvent):
-        yield event.plain_result("160 未买断 在小葵那里～")
-
-    @filter.command("查询卷卷毛绒")
-    async def reply_查询卷卷毛绒(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 二任")
-
-    @filter.command("查询失散银河")
-    async def reply_查询失散银河(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 二人共养中")
-
-    @filter.command("查询青绿")
-    async def reply_查询青绿(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 三任")
-
-    @filter.command("查询明令禁止")
-    async def reply_查询明令禁止(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 三任")
-
-    @filter.command("查询斑斑点点")
-    async def reply_查询斑斑点点(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 五任")
-
-    @filter.command("查询电子速成犬")
-    async def reply_查询电子速成犬(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 二任")
-
-    @filter.command("查询chi掉苹果")
-    async def reply_查询chi掉苹果(self, event: AstrMessageEvent):
-        yield event.plain_result("170 未买断 也是小葵的≥﹏≤我什么时候能p到葵设")
-
-    @filter.command("查询BOBO")
-    async def reply_查询BOBO(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 二任")
-
-    @filter.command("查询餐盘与心脏")
-    async def reply_查询餐盘与心脏(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 二任")
-
-    @filter.command("查询非我所愿")
-    async def reply_查询非我所愿(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 五任")
-
-    @filter.command("查询街区之旅")
-    async def reply_查询街区之旅(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 五任")
-
-    @filter.command("查询怦怦巧克力")
-    async def reply_查询怦怦巧克力(self, event: AstrMessageEvent):
-        yield event.plain_result("255 已买断 三任")
-
-    @filter.command("查询超时链接")
-    async def reply_查询超时链接(self, event: AstrMessageEvent):
-        yield event.plain_result("170 未买断")
-
-    @filter.command("查询距离恒定")
-    async def reply_查询距离恒定(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 三任")
-
-    @filter.command("查询无效祷告")
-    async def reply_查询无效祷告(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断")
-
-    @filter.command("查询糖渍玻璃")
-    async def reply_查询糖渍玻璃(self, event: AstrMessageEvent):
-        yield event.plain_result("650 已买断")
-
-    @filter.command("查询青橘狐狐")
-    async def reply_查询青橘狐狐(self, event: AstrMessageEvent):
-        yield event.plain_result("是送设喔～")
-
-    @filter.command("查询恋爱感应器械")
-    async def reply_查询恋爱感应器械(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断")
-
-    @filter.command("查询枝桠缠绕")
-    async def reply_查询枝桠缠绕(self, event: AstrMessageEvent):
-        yield event.plain_result("180 未买断")
-
-    @filter.command("查询脆脆竹")
-    async def reply_查询脆脆竹(self, event: AstrMessageEvent):
-        yield event.plain_result("180 未买断 在小葵家～下次就p到葵设！")
-
-    @filter.command("查询定制文学少女")
-    async def reply_查询定制文学少女(self, event: AstrMessageEvent):
-        yield event.plain_result("300 是定制啦～！ 三任")
-
-    @filter.command("查询定制纽扣垂耳兔")
-    async def reply_查询定制纽扣垂耳兔(self, event: AstrMessageEvent):
-        yield event.plain_result("250 是定制喔(〃ﾉωﾉ)")
-
-    @filter.command("查询蜜糖红豆年糕")
-    async def reply_查询蜜糖红豆年糕(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 三任")
-
-    @filter.command("查询二象性猫猫")
-    async def reply_查询二象性猫猫(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 二任")
-
-    @filter.command("查询枯萎蛙")
-    async def reply_查询枯萎蛙(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 五任")
-
-    @filter.command("查询灵光乍现")
-    async def reply_查询灵光乍现(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 二任")
-
-    @filter.command("查询白化别西卜")
-    async def reply_查询白化别西卜(self, event: AstrMessageEvent):
-        yield event.plain_result("180 未买断 小葵的✧٩(ˊωˋ*)و✧明天我也p到！")
-
-    @filter.command("查询炙烤虾饼")
-    async def reply_查询炙烤虾饼(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 四任")
-
-    @filter.command("查询飘飘")
-    async def reply_查询飘飘(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 五任")
-
-    @filter.command("查询逃逸的薄荷")
-    async def reply_查询逃逸的薄荷(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断")
-
-    @filter.command("查询期限红酒")
-    async def reply_查询期限红酒(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 二任")
-
-    @filter.command("查询光藓净化")
-    async def reply_查询光藓净化(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 五任")
-
-    @filter.command("查询云际航行")
-    async def reply_查询云际航行(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 二任")
-
-    @filter.command("查询无法治愈")
-    async def reply_查询无法治愈(self, event: AstrMessageEvent):
-        yield event.plain_result("330 已买断 三任")
-
-    @filter.command("查询四分之三的你和四分之一的我")
-    async def reply_查询四分之三的你和四分之一的我(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 二任")
-
-    @filter.command("查询百分百天使")
-    async def reply_查询百分百天使(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 五任")
-
-    @filter.command("查询哩哩")
-    async def reply_查询哩哩(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 二任 在小葵家～～")
-
-    @filter.command("查询定制爱心小草莓")
-    async def reply_查询定制爱心小草莓(self, event: AstrMessageEvent):
-        yield event.plain_result("500 已买断 四任：是定制设喔")
-
-    @filter.command("查询照烧鱼果")
-    async def reply_查询照烧鱼果(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 三任")
-
-    @filter.command("查询回转寿司日")
-    async def reply_查询回转寿司日(self, event: AstrMessageEvent):
-        yield event.plain_result("285 已买断 二任")
-
-    @filter.command("查询赴约期限")
-    async def reply_查询赴约期限(self, event: AstrMessageEvent):
-        yield event.plain_result("270 已买断 二任")
-
-    @filter.command("查询丘比特•七夕特别版")
-    async def reply_查询丘比特_七夕特别版(self, event: AstrMessageEvent):
-        yield event.plain_result("是送设喔～")
-
-    @filter.command("查询青蛙青蛙•七夕特别版")
-    async def reply_查询青蛙青蛙_七夕特别版(self, event: AstrMessageEvent):
-        yield event.plain_result("也是送设喔～")
-
-    @filter.command("查询罗宋汤与胡萝卜")
-    async def reply_查询罗宋汤与胡萝卜(self, event: AstrMessageEvent):
-        yield event.plain_result("180 未买断")
-
-    @filter.command("查询定制bingo")
-    async def reply_查询定制bingo(self, event: AstrMessageEvent):
-        yield event.plain_result("230 定制设不用买断啦")
-
-    @filter.command("查询某年某日")
-    async def reply_查询某年某日(self, event: AstrMessageEvent):
-        yield event.plain_result("200 未买断")
-
-    @filter.command("查询不要熬夜")
-    async def reply_查询不要熬夜(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 三任")
-
-    @filter.command("查询沉默檀香")
-    async def reply_查询沉默檀香(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断")
-
-    @filter.command("查询好运上上签")
-    async def reply_查询好运上上签(self, event: AstrMessageEvent):
-        yield event.plain_result("200 未买断")
-
-    @filter.command("查询心意红豆沙")
-    async def reply_查询心意红豆沙(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 二人共养中")
-
-    @filter.command("查询万圣夜狂欢")
-    async def reply_查询万圣夜狂欢(self, event: AstrMessageEvent):
-        yield event.plain_result("是送设哦 目前是共养中～")
-
-    @filter.command("查询Blinkblink")
-    async def reply_查询Blinkblink(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 二任")
-
-    @filter.command("查询雪花手册")
-    async def reply_查询雪花手册(self, event: AstrMessageEvent):
-        yield event.plain_result("180 未买断")
-
-    @filter.command("查询薄荷致幻")
-    async def reply_查询薄荷致幻(self, event: AstrMessageEvent):
-        yield event.plain_result("285 已买断 二任")
-
-    @filter.command("查询烘焙童话")
-    async def reply_查询烘焙童话(self, event: AstrMessageEvent):
-        yield event.plain_result("190 未买断")
-
-    @filter.command("查询前夕的花蕾")
-    async def reply_查询前夕的花蕾(self, event: AstrMessageEvent):
-        yield event.plain_result("285 已买断 二任")
-
-    @filter.command("查询尘寰浪漫")
-    async def reply_查询尘寰浪漫(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 二任")
-
-    @filter.command("查询日常与不可能的漩涡")
-    async def reply_查询日常与不可能的漩涡(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 三任")
-
-    @filter.command("查询月下葵")
-    async def reply_查询月下葵(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断")
-
-    @filter.command("查询存在性征缪斯")
-    async def reply_查询存在性征缪斯(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 三任")
-
-    @filter.command("查询闪光派激萌")
-    async def reply_查询闪光派激萌(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 三任")
-
-    @filter.command("查询四重维度")
-    async def reply_查询四重维度(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 五任")
-
-    @filter.command("查询夜幕绕行")
-    async def reply_查询夜幕绕行(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 四任")
-
-    @filter.command("查询一页软糖")
-    async def reply_查询一页软糖(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 四任")
-
-    @filter.command("查询才不是玩偶兔")
-    async def reply_查询才不是玩偶兔(self, event: AstrMessageEvent):
-        yield event.plain_result("200 未买断")
-
-    @filter.command("查询美丽新世界")
-    async def reply_查询美丽新世界(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 二任")
-
-    @filter.command("查询行走东京")
-    async def reply_查询行走东京(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 二任")
-
-    @filter.command("查询糖色信仰")
-    async def reply_查询糖色信仰(self, event: AstrMessageEvent):
-        yield event.plain_result("315 已买断 三任")
-
-    @filter.command("查询恒温动物")
-    async def reply_查询恒温动物(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断")
-
-    @filter.command("查询冷血动物")
-    async def reply_查询冷血动物(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 二任 二人共养中")
-
-    @filter.command("查询人群叛离")
-    async def reply_查询人群叛离(self, event: AstrMessageEvent):
-        yield event.plain_result("315 已买断 二任")
-
-    @filter.command("查询崩塌的阈值与象限")
-    async def reply_查询崩塌的阈值与象限(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断")
-
-    @filter.command("查询春季与绿苹果")
-    async def reply_查询春季与绿苹果(self, event: AstrMessageEvent):
-        yield event.plain_result("300 已买断 四任")
-
-    @filter.command("查询睡意西瓜糖")
-    async def reply_查询睡意西瓜糖(self, event: AstrMessageEvent):
-        yield event.plain_result("315 已买断 三任")
-
-    @filter.command("查询云层与梦境")
-    async def reply_查询云层与梦境(self, event: AstrMessageEvent):
-        yield event.plain_result("210 未买断")
-
-    @filter.command("查询乐天派小狗")
-    async def reply_查询乐天派小狗(self, event: AstrMessageEvent):
-        yield event.plain_result("315 已买断 二任")
-
-    @filter.command("查询腐败果实之宴")
-    async def reply_查询腐败果实之宴(self, event: AstrMessageEvent):
-        yield event.plain_result("315 已买断 二任")
-
-    @filter.command("查询无法原谅的一切")
-    async def reply_查询无法原谅的一切(self, event: AstrMessageEvent):
-        yield event.plain_result("315 已买断 二任")
-
-    @filter.command("查询逆向心愿")
-    async def reply_查询逆向心愿(self, event: AstrMessageEvent):
-        yield event.plain_result("315 已买断 二任")
-
-    @filter.command("查询甜蜜冰霜")
-    async def reply_查询甜蜜冰霜(self, event: AstrMessageEvent):
-        yield event.plain_result("315 已买断 四任")
-
-    @filter.command("查询自我上帝")
-    async def reply_查询自我上帝(self, event: AstrMessageEvent):
-        yield event.plain_result("315 已买断 二任 二人共养中")
-
-    @filter.command("查询独居动物")
-    async def reply_查询独居动物(self, event: AstrMessageEvent):
-        yield event.plain_result("700 已买断")
-
-    @filter.command("查询群居动物")
-    async def reply_查询群居动物(self, event: AstrMessageEvent):
-        yield event.plain_result("800 已买断 四任")
-
-    @filter.command("查询透明人间")
-    async def reply_查询透明人间(self, event: AstrMessageEvent):
-        yield event.plain_result("330 已买断 三任 二人共养中")
-
-    @filter.command("查询碱水困境")
-    async def reply_查询碱水困境(self, event: AstrMessageEvent):
-        yield event.plain_result("330 已买断 二任 二人共养中")
-
-    @filter.command("查询完美快消品")
-    async def reply_查询完美快消品(self, event: AstrMessageEvent):
-        yield event.plain_result("330 已买断 五任")
-
-    @filter.command("查询海底囚徒")
-    async def reply_查询海底囚徒(self, event: AstrMessageEvent):
-        yield event.plain_result("330 已买断 五任")
-
-    @filter.command("查询人间一日游指南")
-    async def reply_查询人间一日游指南(self, event: AstrMessageEvent):
-        yield event.plain_result("330 已买断 四任")
-
-    @filter.command("查询枕头里的小妖怪")
-    async def reply_查询枕头里的小妖怪(self, event: AstrMessageEvent):
-        yield event.plain_result("330 已买断 四任")
-
-    @filter.command("查询烟花色与不存在")
-    async def reply_查询烟花色与不存在(self, event: AstrMessageEvent):
-        yield event.plain_result("230 未买断")
-
-    @filter.command("查询异国来信")
-    async def reply_查询异国来信(self, event: AstrMessageEvent):
-        yield event.plain_result("1900 已买断 二任 二人共养中")
-
-    @filter.command("查询滤镜失灵")
-    async def reply_查询滤镜失灵(self, event: AstrMessageEvent):
-        yield event.plain_result("2000 已买断 三任")
-
-    @filter.command("查询谁")
-    async def reply_查询谁(self, event: AstrMessageEvent):
-        yield event.plain_result("345 已买断 三任")
-
-    @filter.command("查询肉食动物")
-    async def reply_查询肉食动物(self, event: AstrMessageEvent):
-        yield event.plain_result("2300 已买断 二人共养中")
-
-    @filter.command("查询朝闻道")
-    async def reply_查询朝闻道(self, event: AstrMessageEvent):
-        yield event.plain_result("3000 已买断 二人共养中")
-
-    @filter.command("查询跃动喵喵")
-    async def reply_查询跃动喵喵(self, event: AstrMessageEvent):
-        yield event.plain_result("是送设哦～")
-
-    @filter.command("查询樱桃关节")
-    async def reply_查询樱桃关节(self, event: AstrMessageEvent):
-        yield event.plain_result("2000 已买断")
-
-    @filter.command("查询魔女的法则")
-    async def reply_查询魔女的法则(self, event: AstrMessageEvent):
-        yield event.plain_result("3200 已买断 三任")
-
-    @filter.command("查询要爱情不要面包")
-    async def reply_查询要爱情不要面包(self, event: AstrMessageEvent):
-        yield event.plain_result("360 已买断 四任")
-
-    @filter.command("查询要面包不要爱情")
-    async def reply_查询要面包不要爱情(self, event: AstrMessageEvent):
-        yield event.plain_result("360 已买断 三任")
-
-    @filter.command("查询我与绽放")
-    async def reply_查询我与绽放(self, event: AstrMessageEvent):
-        yield event.plain_result("3000 已买断 二任")
-
-    @filter.command("查询至高天的降临")
-    async def reply_查询至高天的降临(self, event: AstrMessageEvent):
-        yield event.plain_result("3600 已买断 二任")
-
-    @filter.command("查询被消解的玫瑰")
-    async def reply_查询被消解的玫瑰(self, event: AstrMessageEvent):
-        yield event.plain_result("450 已买断 二任")
-
-    @filter.command("查询理解人类")
-    async def reply_查询理解人类(self, event: AstrMessageEvent):
-        yield event.plain_result("450 已买断 二任")
-
-    @filter.command("查询花束中的新生")
-    async def reply_查询花束中的新生(self, event: AstrMessageEvent):
-        yield event.plain_result("450 已买断 二任")
-
-    @filter.command("查询亡者永生")
-    async def reply_查询亡者永生(self, event: AstrMessageEvent):
-        yield event.plain_result("450 已买断 二任")
-
-    @filter.command("查询外物游离")
-    async def reply_查询外物游离(self, event: AstrMessageEvent):
-        yield event.plain_result("300 未买断")
-
-    @filter.command("查询死生一线")
-    async def reply_查询死生一线(self, event: AstrMessageEvent):
-        yield event.plain_result("5000 已买断 五任")
-
-    @filter.command("查询最终的du约")
-    async def reply_查询最终的du约(self, event: AstrMessageEvent):
-        yield event.plain_result("5800 已买断 二任")
-
-    @filter.command("查询伯爵献礼")
-    async def reply_查询伯爵献礼(self, event: AstrMessageEvent):
-        yield event.plain_result("480 已买断")
-
-    @filter.command("查询牛油果毒素")
-    async def reply_查询牛油果毒素(self, event: AstrMessageEvent):
-        yield event.plain_result("480 已买断 三任")
-
-    @filter.command("查询黑桃戏法")
-    async def reply_查询黑桃戏法(self, event: AstrMessageEvent):
-        yield event.plain_result("600 已买断 三任")
-
-    @filter.command("查询双倍好运")
-    async def reply_查询双倍好运(self, event: AstrMessageEvent):
-        yield event.plain_result("540 已买断")
-
-    @filter.command("查询木头生姜")
-    async def reply_查询木头生姜(self, event: AstrMessageEvent):
-        yield event.plain_result("400 未买断")
-
-    @filter.command("查询神的欺诈")
-    async def reply_查询神的欺诈(self, event: AstrMessageEvent):
-        yield event.plain_result("400 未买断")
-
-    @filter.command("查询果壳枣")
-    async def reply_查询果壳枣(self, event: AstrMessageEvent):
-        yield event.plain_result("630 已买断")
-
-    @filter.command("查询萤火雨季")
-    async def reply_查询萤火雨季(self, event: AstrMessageEvent):
-        yield event.plain_result("600 已买断 三任")
-
-    @filter.command("查询逃亡花园中")
-    async def reply_查询逃亡花园中(self, event: AstrMessageEvent):
-        yield event.plain_result("2000 已买断 二任")
-
-    @filter.command("查询低温的星星")
-    async def reply_查询低温的星星(self, event: AstrMessageEvent):
-        yield event.plain_result("450 未买断")
-
-    @filter.command("查询宇宙徊")
-    async def reply_查询宇宙徊(self, event: AstrMessageEvent):
-        yield event.plain_result("630 已买断")
-
-    @filter.command("查询YEAH")
-    async def reply_查询YEAH(self, event: AstrMessageEvent):
-        yield event.plain_result("420 未买断")
-
-    @filter.command("查询卷毛咖啡yin")
-    async def reply_查询卷毛咖啡yin(self, event: AstrMessageEvent):
-        yield event.plain_result("645 已买断 三任")
-
-    @filter.command("查询幸福过敏")
-    async def reply_查询幸福过敏(self, event: AstrMessageEvent):
-        yield event.plain_result("420 未买断")
-
-    @filter.command("查询雪国往事")
-    async def reply_查询雪国往事(self, event: AstrMessageEvent):
-        yield event.plain_result("430 未买断")
-
-    @filter.command("查询定制爱意复写")
-    async def reply_查询定制爱意复写(self, event: AstrMessageEvent):
-        yield event.plain_result("设主是酒酒咪～")
-
-    @filter.command("查询定制怀旧映像")
-    async def reply_查询定制怀旧映像(self, event: AstrMessageEvent):
-        yield event.plain_result("设主是雾凇咪～")
-
-    @filter.command("查询定制概率游戏")
-    async def reply_查询定制概率游戏(self, event: AstrMessageEvent):
-        yield event.plain_result("设主是阿鹤咪～")
-
-    @filter.command("查询彩虹糖时间")
-    async def reply_查询彩虹糖时间(self, event: AstrMessageEvent):
-        yield event.plain_result("430 未买断")
-
-    @filter.command("查询白鸟停滞")
-    async def reply_查询白鸟停滞(self, event: AstrMessageEvent):
-        yield event.plain_result("3250 已买断 四任")
-
-    @filter.command("查询子午线神游")
-    async def reply_查询子午线神游(self, event: AstrMessageEvent):
-        yield event.plain_result("1000 已买断 三任")
-
-    @filter.command("查询定制人类失重")
-    async def reply_查询定制人类失重(self, event: AstrMessageEvent):
-        yield event.plain_result("设主是小飒～")
-
-    @filter.command("查询定制唯")
-    async def reply_查询定制唯(self, event: AstrMessageEvent):
-        yield event.plain_result("设主是浮元子～")
-
-    @filter.command("查询定制赫利俄斯之下")
-    async def reply_查询定制赫利俄斯之下(self, event: AstrMessageEvent):
-        yield event.plain_result("设主是芷阳～")
-
-    @filter.command("查询美子的果实")
-    async def reply_查询美子的果实(self, event: AstrMessageEvent):
-        yield event.plain_result("1200 已买断")
-
-    @filter.command("查询定制遐迩之月")
-    async def reply_查询定制遐迩之月(self, event: AstrMessageEvent):
-        yield event.plain_result("设主是池上月～")
-
-    @filter.command("查询零点一冰室")
-    async def reply_查询零点一冰室(self, event: AstrMessageEvent):
-        yield event.plain_result("720 已买断 二任")
-
-    @filter.command("查询乌鸦的权杖")
-    async def reply_查询乌鸦的权杖(self, event: AstrMessageEvent):
-        yield event.plain_result("750 已买断")
-
-    @filter.command("查询簌簌")
-    async def reply_查询簌簌(self, event: AstrMessageEvent):
-        yield event.plain_result("720 已买断 三任")
-
-    @filter.command("查询芭比巴卜")
-    async def reply_查询芭比巴卜(self, event: AstrMessageEvent):
-        yield event.plain_result("500 未买断")
-
-    @filter.command("查询冷冷的夏天")
-    async def reply_查询冷冷的夏天(self, event: AstrMessageEvent):
-        yield event.plain_result("780 已买断 二任")
-
-    @filter.command("查询三只猎犬")
-    async def reply_查询三只猎犬(self, event: AstrMessageEvent):
-        yield event.plain_result("800 已买断")
-
-    @filter.command("查询BLUES")
-    async def reply_查询BLUES(self, event: AstrMessageEvent):
-        yield event.plain_result("800 已买断 二任")
-
-    @filter.command("查询北芪与白山")
-    async def reply_查询北芪与白山(self, event: AstrMessageEvent):
-        yield event.plain_result("500 未买断")
-
-    @filter.command("查询浴室里的啵帕")
-    async def reply_查询浴室里的啵帕(self, event: AstrMessageEvent):
-        yield event.plain_result("520 未买断")
-
-    @filter.command("查询红苹果之森")
-    async def reply_查询红苹果之森(self, event: AstrMessageEvent):
-        yield event.plain_result("500 未买断")
-
-    @filter.command("查询青苹果之塔")
-    async def reply_查询青苹果之塔(self, event: AstrMessageEvent):
-        yield event.plain_result("520 未买断")
-
-    @filter.command("查询金苹果之谜")
-    async def reply_查询金苹果之谜(self, event: AstrMessageEvent):
-        yield event.plain_result("780 已买断 三任")
-
-    @filter.command("查询紫苹果之药")
-    async def reply_查询紫苹果之药(self, event: AstrMessageEvent):
-        yield event.plain_result("780 已买断 二任")
-
-    @filter.command("查询七月流火")
-    async def reply_查询七月流火(self, event: AstrMessageEvent):
-        yield event.plain_result("850 已买断")
-
-    @filter.command("查询安娜苏的日记簿")
-    async def reply_查询安娜苏的日记簿(self, event: AstrMessageEvent):
-        yield event.plain_result("850 已买断 二任")
-
-    @filter.command("查询CANDY")
-    async def reply_查询CANDY(self, event: AstrMessageEvent):
-        yield event.plain_result("850 已买断")
-
-    @filter.command("查询墨鱼的论坛")
-    async def reply_查询墨鱼的论坛(self, event: AstrMessageEvent):
-        yield event.plain_result("850 已买断 三任")
-
-    @filter.command("查询山莓会社")
-    async def reply_查询山莓会社(self, event: AstrMessageEvent):
-        yield event.plain_result("780 已买断 二任")
-
-    @filter.command("查询天使城邀约")
-    async def reply_查询天使城邀约(self, event: AstrMessageEvent):
-        yield event.plain_result("780 已买断")
-
-    @filter.command("查询都市恶灵废墟")
-    async def reply_查询都市恶灵废墟(self, event: AstrMessageEvent):
-        yield event.plain_result("1200 已买断 二任")
-
-    @filter.command("查询定制雾镜迷城")
-    async def reply_查询定制雾镜迷城(self, event: AstrMessageEvent):
-        yield event.plain_result("设主是雾凇咪～")
-
-    @filter.command("查询定制命运长街")
-    async def reply_查询定制命运长街(self, event: AstrMessageEvent):
-        yield event.plain_result("设主是雾凇咪～")
-
-    @filter.command("查询POPO")
-    async def reply_查询POPO(self, event: AstrMessageEvent):
-        yield event.plain_result("2400 已买断 二任")
-
-    @filter.command("一共有多少个云设")
-    async def reply_一共有多少个云设(self, event: AstrMessageEvent):
-        yield event.plain_result("到目前为止，录入bot的设定一共有439个哦✧٩(ˊωˋ*)و✧")
-
-
-
+    def _time_period(self, now: datetime | None = None) -> str:
+        """按小时划分时间段：早上/中午/下午/晚上/半夜"""
+        h = (now or datetime.now()).hour
+        if 5 <= h <= 10:
+            return "morning"
+        if 11 <= h <= 13:
+            return "noon"
+        if 14 <= h <= 17:
+            return "afternoon"
+        if 18 <= h <= 22:
+            return "evening"
+        return "midnight"  # 23~4
+
+
+    # ---- 已有指令：小碎（保留随机多语气） ----
+    @filter.command("小碎")
+    async def helloworld(self, event: AstrMessageEvent):
+        """这是一个 hello world 指令"""
+        user_name = event.get_sender_name()
+        message_str = event.message_str  # 用户发的纯文本消息字符串
+        message_chain = event.get_messages()  # 用户所发的消息的消息链
+        logger.info(message_chain)
+
+        replies = [
+            f"你好呀，{user_name}，小碎在这里～",
+            f"{user_name}，找我有什么事吗？",
+            f"在呢在呢～{user_name}，小碎随时待命！",
+            f"怎么了吗？",
+            f"我在(*'▽'*)♪",
+            f"嗨——"
+        ]
+        yield event.plain_result(random.choice(replies))
+
+# ---- 新增指令：签到（已加“每日一次”限制） ----
+@filter.command("签到")
+async def sign_in(self, event: AstrMessageEvent):
+    """根据时间段打招呼 + 随机获得好感度与玻璃珠，并记录到背包；每日仅可签到一次"""
+    user_name = event.get_sender_name()
+    user_id = self._get_user_id(event)
+
+    # ——【保持原样：每天只能签到一次的校验】——
+    today = datetime.now().date().isoformat()
+    user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+    if user.get("last_sign") == today:
+        yield event.plain_result(
+            f"{user_name}，今天已经签过到啦～\n当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
+        )
+        return
+    # ——【校验结束】——
+
+    # ——【新增①：不引入任何全局键，直接用当前“已签到人数”推算名次】——
+    # 统计今天已经签到过的用户数量（此时还未给当前用户标记 last_sign）
+    rank_today = 1 + sum(
+        1 for u in self._state["users"].values()
+        if u.get("last_sign") == today
+    )
+    # ——【新增①结束】——
+
+    period = self._time_period()
+    pool = {
+        "morning": [
+            f"早安，{user_name}！小碎为你点亮新的一天～",
+            f"{user_name} 早呀！今天也一起加油！",
+            f"清晨好，{user_name}～来摸摸小碎提提神！",
+            f"小碎送来一杯热可可，{user_name} 早上好！",
+            f"新的一天，从和小碎说早安开始吧，{user_name}～",
+            f"晨光正好，{user_name}～"
+        ],
+        "noon": [
+            f"午间好，{user_name}～记得补充能量哦！",
+            f"{user_name} 午好！小碎给你加点效率 BUFF～",
+            f"小憩一下吧，{user_name}～小碎守着你！",
+            f"咕噜咕噜～午饭好吃吗 {user_name}？",
+            f"精神满满的下午从饱饱的中午开始！{user_name}～",
+            f"午安～{user_name}，小碎在线待命！"
+        ],
+        "afternoon": [
+            f"下午好，{user_name}～小碎陪你继续冲刺！",
+            f"{user_name}，下午的太阳刚刚好～",
+            f"来点小甜点如何？小碎请你～",
+            f"保持专注，{user_name}～小碎给你打气！",
+            f"嗷嗷～{user_name}，小碎在这儿守护你！",
+            f"下午茶时间到～{user_name} 要不要来一口？"
+        ],
+        "evening": [
+            f"晚上好，{user_name}～要不要一起放松下？",
+            f"{user_name} 辛苦啦！小碎给你舒缓一下～",
+            f"夜色真美，{user_name}～小碎也在！",
+            f"来听会儿歌吧，{user_name}～小碎陪你～",
+            f"收工快乐，{user_name}！小碎为你点亮小灯灯～",
+            f"晚风轻拂～{user_name}，小碎在这儿～"
+        ],
+        "midnight": [
+            f"半夜啦，{user_name}～注意休息哦，小碎抱抱～",
+            f"{user_name} 还没睡呀？小碎小声陪你～",
+            f"夜深了，{user_name}～要不要喝点热牛奶？",
+            f"小碎给你盖小被子～{user_name} 晚安前的签到也很可爱！",
+            f"星星眨眼睛～{user_name}，小碎悄悄上线～",
+            f"夜猫子小队集合！{user_name}～小碎打卡到！"
+        ],
+    }
+
+    greet = random.choice(pool[period])
+
+    favor_inc = random.randint(0, 30)
+    marbles_inc = random.randint(0, 30)
+
+    # 落库（保持原逻辑）
+    user["favor"] += favor_inc
+    user["marbles"] += marbles_inc
+    user["last_sign"] = today
+    self._save_state()
+
+    # ——【新增②：把“排名”合并到同一条消息最前面】——
+    reply = (
+        f"你是今天第{rank_today}位签到的~\n"
+        f"{greet}\n"
+        f"签到成功啦～小碎好感度 +{favor_inc}，小碎赠予你 {marbles_inc} 颗玻璃珠。\n"
+        f"当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
+    )
+    # ——【新增②结束】——
+
+    yield event.plain_result(reply)
+
+    res = await _try_drop_egg(self,event, is_interaction=True)
+    if res: yield res
+
+    
+    # ---- 新版：占卜（每日一次，内联数据，仅三组牌）----
+    @filter.command("占卜")
+    async def divination(self, event: AstrMessageEvent):
+        """
+        每日仅可占卜一次：
+        - 首次占卜扣 20 玻璃珠
+        - 随机抽取 22 大阿卡那中的前三组（愚者/魔术师/女祭司，含正逆）
+        - 展示等级（SSS/SS/S/B/C/D/F）和中文形容，并根据好/波动/坏给祝福或安慰
+        - 玻璃珠增减区间受等级影响（最终裁切到 ±266）
+        - 好感度 +0~50，与牌面无关
+        - SSS 牌有 10% 额外 +999 玻璃珠奖励
+        """
+        user_name = event.get_sender_name()
+        user_id = self._get_user_id(event)
+        user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+        # 每日一次
+        today = datetime.now().date().isoformat()
+        if user.get("last_divine") == today:
+            yield event.plain_result(
+                f"🔒 {user_name}，今天已经占卜过啦～明天再来试试吧！\n"
+                f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+            )
+            return
+
+        # 占卜费用（仅首次）
+        fee = 20
+        user["marbles"] = user.get("marbles", 0) - fee
+
+        # 等级 -> 形容词 & 玻璃珠区间（最终会裁切到 ±266）
+        RATING_WORD = {
+            "SSS": "特别棒的",
+            "SS":  "很好的",
+            "S":   "不错的",
+            "B":   "有波动的",
+            "C":   "不太顺的",
+            "D":   "糟心的",
+            "F":   "相当危险的",
+        }
+        MARBLE_RANGE = {
+            "SSS": (200, 266),
+            "SS":  (120, 220),
+            "S":   (40, 160),
+            "B":   (-60, 120),
+            "C":   (-160, 40),
+            "D":   (-220, -40),
+            "F":   (-266, -120),
+        }
+
+        # 仅前三组牌（正/逆）
+        CARDS = {
+            "愚者": {
+                "upright":  {"core": "自由", "type": "SS",  "keywords": ["起点","冒险","单纯","信任","未知","旅途"], "interp": "拥抱未知，轻装上路会带来新鲜突破。"},
+                "reversed": {"core": "鲁莽", "type": "C",   "keywords": ["冲动","迷路","逃避","风险","幼稚","分心"], "interp": "先看脚下再跳，边界与计划缺一不可。"},
+            },
+            "魔术师": {
+                "upright":  {"core": "创造", "type": "SSS", "keywords": ["专注","沟通","资源","技巧","显化","机会"], "interp": "心之所向可被实现，主动出手就是魔法。"},
+                "reversed": {"core": "失衡", "type": "F",   "keywords": ["欺骗","分神","虚张","失控","散漫","反复"], "interp": "谨防口惠而实不至，把能量收束回到行动。"},
+            },
+            "女祭司": {
+                "upright":  {"core": "直觉", "type": "S",   "keywords": ["潜意识","静观","神秘","梦境","洞察","沉默"], "interp": "答案在心底，给直觉一点安静的空间。"},
+                "reversed": {"core": "压抑", "type": "C",   "keywords": ["怀疑","迟疑","隔阂","隐瞒","自我否定","迷雾"], "interp": "过度压抑会遮蔽线索，承认感受即是起点。"},
+            },
+            "女皇": {
+                "upright":  {"core": "丰盛", "type": "SS", "keywords": ["创造","滋养","成长","美感","安逸","母性"], "interp": "照顾他人也别忘了自己，丰盛来自平衡的给予。"},
+                "reversed": {"core": "匮乏", "type": "D", "keywords": ["疲惫","依赖","过度付出","冷漠","封闭","失衡"], "interp": "当能量只流出不流入，美好也会枯竭。"},
+            },
+            "皇帝": {
+                "upright":  {"core": "掌控", "type": "SS", "keywords": ["权威","秩序","责任","理性","执行","稳定"], "interp": "果断与规则让局面井然，责任感是最稳固的基石。"},
+                "reversed": {"core": "僵化", "type": "C", "keywords": ["独断","压迫","失控","固执","滥权","刚愎"], "interp": "控制不等于掌控，学会放手才能真正统御。"},
+            },
+            "教皇": {
+                "upright":  {"core": "信念", "type": "S", "keywords": ["传统","伦理","学习","指导","信仰","秩序"], "interp": "沿袭经验也可焕新意义，尊重不等于盲从。"},
+                "reversed": {"core": "教条", "type": "C", "keywords": ["虚伪","封闭","盲信","僵化","伪善","桎梏"], "interp": "打破旧框架，信念要能滋养而非束缚心灵。"},
+            },
+            "恋人": {
+                "upright":  {"core": "连结", "type": "S", "keywords": ["爱情","契合","选择","信任","共鸣","吸引"], "interp": "内外和谐的选择会让你与世界都更亲近。"},
+                "reversed": {"core": "分歧", "type": "D", "keywords": ["冲突","诱惑","犹豫","不忠","冷淡","矛盾"], "interp": "情感或价值的裂缝需要诚实面对，而非逃避。"},
+            },
+            "战车": {
+                "upright":  {"core": "意志", "type": "SS", "keywords": ["胜利","前进","目标","专注","速度","方向"], "interp": "掌舵者的意志决定航向，集中火力向前冲。"},
+                "reversed": {"core": "失控", "type": "C", "keywords": ["冲动","分心","犹豫","退缩","阻力","混乱"], "interp": "拉缰绳而不是马鞭，先稳住方向再加速。"},
+            },
+            "力量": {
+                "upright":  {"core": "勇气", "type": "SS", "keywords": ["温柔","耐心","自信","坚毅","掌控","平衡"], "interp": "真正的力量是温柔而坚定，对自己也要仁慈。"},
+                "reversed": {"core": "脆弱", "type": "C", "keywords": ["怯懦","失衡","焦虑","依赖","自我怀疑","暴躁"], "interp": "别和恐惧硬碰硬，承认脆弱也是力量。"},
+            },
+            "隐士": {
+                "upright":  {"core": "内省", "type": "S", "keywords": ["思考","智慧","孤独","洞察","沉淀","启示"], "interp": "独处不是逃避，而是与自我对话的机会。"},
+                "reversed": {"core": "迷茫", "type": "C", "keywords": ["孤立","闭塞","犹豫","冷漠","逃避","退缩"], "interp": "自省若无行动，只会变成封闭的循环。"},
+            },
+            "命运之轮": {
+                "upright":  {"core": "机缘", "type": "SS", "keywords": ["转折","变化","循环","机会","命运","节奏"], "interp": "潮起潮落皆为契机，把握节奏乘势而上。"},
+                "reversed": {"core": "停滞", "type": "D", "keywords": ["错失","拖延","重复","抗拒","不顺","偏离"], "interp": "命运不帮倒忙，只是等你先迈出那一步。"},
+            },
+            "正义": {
+                "upright":  {"core": "公正", "type": "S", "keywords": ["平衡","真相","判断","责任","诚信","理性"], "interp": "诚实面对因果，决策的刀锋要稳。"},
+                "reversed": {"core": "偏颇", "type": "C", "keywords": ["不公","误判","虚伪","偏见","推诿","混乱"], "interp": "逃避审视只会让秤更歪，承担即修正。"},
+            },
+            "倒吊人": {
+                "upright":  {"core": "顿悟", "type": "S", "keywords": ["牺牲","等待","转换","洞察","暂停","释然"], "interp": "改变视角后，束缚也许就是自由的钥匙。"},
+                "reversed": {"core": "抗拒", "type": "C", "keywords": ["固执","停滞","逃避","无奈","浪费","延迟"], "interp": "不必被动受困，主动松手才有余地。"},
+            },
+            "死神": {
+                "upright":  {"core": "重生", "type": "SS", "keywords": ["结束","转化","放下","更新","重启","净化"], "interp": "勇敢告别过去，新的周期已在脚下展开。"},
+                "reversed": {"core": "停滞", "type": "D", "keywords": ["拖延","抗拒改变","沉溺","旧习","停滞","惧怕"], "interp": "拒绝结束，就等于拒绝成长。"},
+            },
+            "节制": {
+                "upright":  {"core": "平衡", "type": "SS", "keywords": ["协调","耐心","融合","自控","适度","疗愈"], "interp": "节奏的拿捏是艺术，保持心与行的温度。"},
+                "reversed": {"core": "失调", "type": "C", "keywords": ["过度","放纵","矛盾","失衡","冲突","躁动"], "interp": "过多或过少都偏离中心，回到中点再出发。"},
+            },
+            "恶魔": {
+                "upright":  {"core": "欲望", "type": "B", "keywords": ["诱惑","执着","束缚","诱因","享乐","阴影"], "interp": "欲望不该被否定，关键是你掌握它，而非被掌握。"},
+                "reversed": {"core": "解放", "type": "S", "keywords": ["觉醒","挣脱","放下","清醒","自由","自控"], "interp": "认出锁链，便是打断它的第一步。"},
+            },
+            "塔": {
+                "upright":  {"core": "崩塌", "type": "F", "keywords": ["突变","冲击","崩坏","真相","剧变","警醒"], "interp": "旧结构崩塌只是前奏，清理废墟才能重建。"},
+                "reversed": {"core": "重组", "type": "C", "keywords": ["缓和","修复","自省","避免","迟疑","余波"], "interp": "别惧怕瓦解，那是重塑的信号。"},
+            },
+            "星星": {
+                "upright":  {"core": "希望", "type": "SSS", "keywords": ["灵感","疗愈","信念","平静","美好","未来"], "interp": "黑夜正因为有星光，才值得仰望。"},
+                "reversed": {"core": "失望", "type": "C", "keywords": ["疑虑","动摇","沮丧","迷茫","悲观","退缩"], "interp": "希望未消失，只是被尘埃遮住，擦一擦就亮了。"},
+            },
+            "月亮": {
+                "upright":  {"core": "潜意识", "type": "B", "keywords": ["梦境","幻象","直觉","情绪","神秘","不安"], "interp": "直觉是指南针，不是恐惧的放大镜。"},
+                "reversed": {"core": "幻灭", "type": "D", "keywords": ["欺骗","误判","困惑","幻想","焦虑","迷路"], "interp": "幻象散去后，留下的是真实。"},
+            },
+            "太阳": {
+                "upright":  {"core": "喜悦", "type": "SSS", "keywords": ["成功","幸福","自信","清晰","能量","光明"], "interp": "温暖照亮一切，分享快乐让好运加倍。"},
+                "reversed": {"core": "延迟", "type": "C", "keywords": ["疲惫","阴影","失落","困顿","自我怀疑","迟缓"], "interp": "阳光暂时被云遮住，但依然在你背后。"},
+            },
+            "审判": {
+                "upright":  {"core": "觉醒", "type": "SS", "keywords": ["重生","反思","决断","救赎","更新","回应"], "interp": "是时候回应自己的召唤，新的篇章已开启。"},
+                "reversed": {"core": "逃避", "type": "F", "keywords": ["后悔","自责","否认","拖延","怯懦","混乱"], "interp": "原谅自己才能再次起身，宽恕是重生的门。"},
+            },
+            "世界": {
+                "upright":  {"core": "完成", "type": "SS", "keywords": ["成就","圆满","整合","成功","终点","平衡"], "interp": "旅途终将圆满，你已成为那个更完整的自己。"},
+                "reversed": {"core": "未竟", "type": "C", "keywords": ["半途","停滞","阻碍","遗憾","失衡","迷失"], "interp": "终点未远，只是需要再迈最后一步。"},
+            },
+        }
+
+        # 随机抽牌与正逆
+        card_name = random.choice(list(CARDS.keys()))
+        upright = random.choice([True, False])
+        orient = "upright" if upright else "reversed"
+        m = CARDS[card_name][orient]
+        orient_cn = "正位" if upright else "逆位"
+        rating = m["type"]
+
+        # 玻璃珠增减（按等级），并裁切到 ±266
+        rmin, rmax = MARBLE_RANGE[rating]
+        marble_delta = random.randint(rmin, rmax)
+        marble_delta = max(-266, min(266, marble_delta))
+
+        # 好感度独立 +0~50
+        favor_inc = random.randint(0, 50)
+
+        # SSS 10% 额外奖励
+        bonus = 0
+        bonus_text = ""
+        if rating == "SSS" and random.random() < 0.10:
+            bonus = 999
+            bonus_text = "\n🎉 中奖时刻！群星垂青，额外获得 **999** 颗玻璃珠！"
+
+        # 好/波动/坏 -> 祝福/安慰
+        if rating in ("SSS", "SS", "S"):
+            mood_pool = [
+                "🕊️ 祝福送达：顺风顺水、步步开花！",
+                "🌟 保持清澈与专注，好运与成果相互奔赴。",
+                "🚀 节奏对了就别停，今天的舞台灯正亮着。",
+            ]
+        elif rating == "B":
+            mood_pool = [
+                "🌗 形势有波动，收束变量稳稳推进。",
+                "🧭 先拿下一个小目标，趋势自然会靠拢你。",
+                "⚖️ 少量正确比大量盲冲更强。",
+            ]
+        else:
+            mood_pool = [
+                "🫧 别怕，先安顿好自己，路会在脚下重新出现。",
+                "🌧️ 暂避锋芒也算前进，修复能量再出发。",
+                "🛡️ 把风险写出来就降级一半，慢慢来，一切都会过去。",
+            ]
+        mood_line = random.choice(mood_pool)
+
+        # 更新状态并标记今日已占卜
+        user["favor"] += favor_inc
+        user["marbles"] += marble_delta + bonus
+        user["last_divine"] = today
+        self._save_state()
+
+        # 输出
+        def fmt_signed(n: int) -> str:
+            return f"+{n}" if n >= 0 else f"{n}"
+        rating_word = RATING_WORD[rating]
+        keywords = "、".join(m["keywords"][:6])
+
+        reply = (
+            f"🔮 我收取了 **{fee}** 枚玻璃珠作为占卜费用……\n"
+            f"✨ 本次是 **{card_name}·{orient_cn}**\n"
+            f"等级：**{rating}（{rating_word}）**\n"
+            f"核心：**{m['core']}**｜其它：{keywords}\n"
+            f"🔎 解析：{m['interp']}\n"
+            f"{mood_line}\n"
+            f"💗 小碎好感度 {fmt_signed(favor_inc)}，"
+            f"🫧 玻璃珠 {fmt_signed(marble_delta + bonus)}{bonus_text}\n"
+            f"📦 当前背包｜好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
+        )
+        yield event.plain_result(reply)
+
+
+        res = await _try_drop_egg(self,event, is_interaction=True)
+        if res: yield res
+
+
+
+
+
+    # ---- 新增指令：投喂（42条候选，含特殊食物，3分钟冷却）----
+    @filter.command("投喂")
+    async def feed_xiaosui(self, event: AstrMessageEvent):
+        """给小碎投喂；每次好感度+0~10，命中特殊食物额外+5~20；冷却3分钟"""
+        user_name = event.get_sender_name()
+        user_id = self._get_user_id(event)
+        user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+        now_ts = int(datetime.now().timestamp())
+        cd = 180  # 3分钟
+        last_ts = int(user.get("last_feed_ts", 0))
+        remain = cd - (now_ts - last_ts)
+        if remain > 0:
+            mm, ss = divmod(remain, 60)
+            wait_str = f"{mm}分{ss}秒" if mm else f"{ss}秒"
+            yield event.plain_result(
+                f"⌛ {user_name}，小碎还在消化中～请再等 {wait_str} 再投喂。\n"
+                f"💗 当前好感度：{user.get('favor',0)}"
+            )
+            return
+
+        # 结构：(一句话情景文本, 是否特殊)
+        pool = []
+
+        # --- 星露谷物语 ×10（新增2条：生鱼片、幸运午餐） ---
+        pool += [
+            ("小碎接过星露谷的披萨，边吹边咬一口，芝士拉出细细长丝。", False),
+            ("粉红蛋糕香气扑鼻，小碎小口啃着，脸颊鼓鼓的。", False),
+            ("星露谷的咖啡刚冲好，小碎捧着杯子深吸一口气再轻抿。", False),
+            ("鲑鱼晚餐摆上桌，小碎认真地把柠檬挤在鱼排上。", False),
+            ("巧克力蛋糕切下一角，小碎把叉子立正地插好再优雅送入口。", False),
+            ("龙虾浓汤热气氤氲，小碎端稳碗边吹边喝。", False),
+            ("香辣鳗鱼一上来，小碎眯起眼睛说：这股劲儿正合适。", True),          # 特殊
+            ("金星南瓜派切面细腻，小碎晃晃叉子：今天也会很顺利。", True),        # 特殊
+            ("生鱼片切得晶莹，小碎蘸了一点酱油，满足地眯起眼。", False),           # 新增
+            ("幸运午餐端到面前，小碎认真默念：今天要抓住好时机。", True),         # 新增/特殊
+        ]
+
+        # --- 饥荒 ×5 ---
+        pool += [
+            ("小碎把饥荒的肉丸倒进碗里，用小勺一下一下地舀。", False),
+            ("太妃糖甜意蔓延，小碎舔了舔指尖上的糖霜。", False),
+            ("培根煎蛋滋滋作响，小碎把蛋黄轻轻戳破配着培根吞下。", True),       # 特殊
+            ("饕餮馅饼切开冒着热气，小碎吹了两口才敢咬。", True),                  # 特殊
+            ("波兰饺子皮薄馅足，小碎夹起一个蘸了点酱再吃。", False),
+        ]
+
+        # --- 泰拉瑞亚 ×5 ---
+        pool += [
+            ("熟鱼肉质紧实，小碎顺着鱼刺细细拆开吃得很认真。", False),
+            ("南瓜派切成扇形，小碎数了数层次才下口。", False),
+            ("一碗热汤端上来，小碎先试探地抿了一口再点头。", False),
+            ("苹果派略带肉桂香，小碎把边缘的酥皮先掰掉吃。", False),
+            ("至尊培根油亮喷香，小碎一口下去精神都跟着抖擞起来。", True),       # 特殊
+        ]
+
+        # --- 通用可爱互动 ×22 ---
+        pool += [
+            ("热可可送到手心，小碎呼一口热气暖暖指尖。", False),
+            ("草莓牛奶冰凉顺喉，小碎在吸管里发出小小的咕噜声。", False),
+            ("抹茶曲奇咔哧一声，小碎认真数着碎屑别让它们逃跑。", False),
+            ("蜜瓜面包外脆内软，小碎把顶上的格子一块块掰开。", False),
+            ("薄荷冰淇淋化得很快，小碎飞快地转着杯子防止滴落。", False),
+            ("芝士汉堡层层叠，小碎从侧面小心翼翼地咬第一口。", False),
+            ("蜂蜜柚子茶微苦回甘，小碎捧杯看着浮起的柚皮条发呆。", False),
+            ("可丽饼卷着奶油，小碎先舔了一下边缘确认不会沾鼻尖。", False),
+            ("彩虹果冻在盘里抖动，小碎用勺背轻轻按了按。", True),                # 特殊
+            ("焦糖布蕾敲开脆皮，小碎满意地点点头。", False),
+            ("焗土豆牵丝拉长，小碎把丝绕在叉子上慢慢卷。", False),
+            ("乌龙奶盖茶入口绵密，小碎把奶盖胡子抹掉后偷笑。", False),
+            ("樱花团子软糯弹牙，小碎一串一串地分给大家。", False),
+            ("海盐美式醒脑一击，小碎眨眨眼决定开始干活。", False),
+            ("松饼塔叠得高高的，小碎担心倒塌先抽走最顶上一片。", False),
+            ("柠檬塔酸甜对撞，小碎被刺激得肩膀一抖又想再来一口。", False),
+            ("巧克力豆在掌心融化，小碎赶紧一颗颗送进嘴里。", False),
+            ("蜜桃乌龙果香四溢，小碎把漂浮的果肉捞起来慢慢嚼。", False),
+            ("星光糖在舌尖噼啪作响，小碎被惊到笑出声。", True),                 # 特殊
+            ("小熊软糖排成方阵，小碎宣布开饭仪式并迅速解散队伍。", False),
+            ("玉米棒刷了黄油，小碎顺着纹路一排排地啃。", False),
+            ("椰子布丁轻轻晃动，小碎叮嘱自己这次一定不要打翻。", False),
+        ]
+
+        # 安全兜底
+        if not pool:
+            pool = [("小饼干一块，小碎眯起眼心情变好。", False)]
+
+        # --- 随机抽取 ---
+        text, is_special = random.choice(pool)
+
+        # --- 基础好感 +0~10 ---
+        favor_inc = random.randint(0, 10)
+        bonus_inc = 0
+        bonus_text = ""
+        if is_special:
+            bonus_inc = random.randint(5, 20)
+            bonus_text = f"\n诶，吃到了特别的食物！小碎好感度额外增加 {bonus_inc}"
+
+        # --- 更新与落盘（记录冷却时间戳）---
+        user["favor"] += favor_inc + bonus_inc
+        user["last_feed_ts"] = now_ts
+        self._save_state()
+
+        # --- 回复 ---
+        def fmt_plus(n: int) -> str:
+            return f"+{n}" if n >= 0 else f"{n}"
+
+        reply = (
+            f"{user_name} 投喂：{text}\n"
+            f"好感度 {fmt_plus(favor_inc)}{bonus_text}\n"
+            f"💗 当前好感度：{user['favor']}"
+        )
+        yield event.plain_result(reply)
+
+        res = await _try_drop_egg(self,event, is_interaction=True)
+        if res: yield res
+
+
+# ---- 新增指令：运势（0与100有特殊奖励）----
+@filter.command("运势")
+async def fortune(self, event: AstrMessageEvent):
+    """
+    随机给出 0~100 的当下运势值。
+    - 运势=0：安慰并赠送 3 颗玻璃珠（含鼓励话术）
+    - 运势=100：+10 好感度，+50 玻璃珠（含祝福话术）
+    """
+    user_name = event.get_sender_name()
+    user_id = self._get_user_id(event)
+    user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+    FACES = [
+        "(๑•̀ㅂ•́)و✧", "(つ´ω`)つ", "(*/ω＼*)", "(๑ᵔ⤙ᵔ๑)", "(=^･ω･^=)",
+        "( ੭ ˙ᗜ˙ )੭", "(≧▽≦)/", "ヾ(•ω•`)o", "(｡•̀ᴗ-)✧", "(ง •̀_•́)ง",
+        "(˶ᵔ ᵕ ᵔ˶)", "(•̀ᴗ•́)و ̑̑", "(*´∀`*)", "(｡˃ ᵕ ˂ )b", "(　＾∀＾)"
+    ]
+    face = random.choice(FACES)
+
+    x = random.randint(0, 100)
+
+    base_line = f"你当下的运势是 {x}，顺带一提，运势是百分制的哦~ {face}"
+
+    # 特殊分支：0 与 100
+    if x == 0:
+        user["marbles"] += 3
+        encourage_pool = [
+            "低谷是弹射的起点，慢慢来会好起来的～",
+            "别担心，休整一下再出发，风会转向你这边。",
+            "把情绪放下半步，路就会出现。加油！"
+        ]
+        reply = (
+            f"{base_line}\n"
+            f"🫧 小碎送你 3 颗玻璃珠以示安慰。\n"
+            f"📣 {random.choice(encourage_pool)}\n"
+            f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+        )
+        self._save_state()
+        yield event.plain_result(reply)
+        return
+
+    if x == 100:
+        user["favor"] += 10
+        user["marbles"] += 50
+        bless_pool = [
+            "愿你所想皆如愿、所行皆坦途！",
+            "万事顺遂，灵感与好运一起到访～",
+            "今天你发光，世界都在为你让路！"
+        ]
+        reply = (
+            f"{base_line}\n"
+            f"🎉 满分好运！小碎为你提升好感度 +10，并赠送 50 颗玻璃珠！\n"
+            f"🌟 {random.choice(bless_pool)}\n"
+            f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+        )
+        self._save_state()
+        yield event.plain_result(reply)
+        return
+
+    # 常规分支：1~99
+    reply = f"{base_line}\n📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+    yield event.plain_result(reply)
+
+
+
+# ---- 新增指令：我还要签到（九段运势，仅玻璃珠变动，不加好感）----
+@filter.command("我还要签到")
+async def extra_sign_in(self, event: AstrMessageEvent):
+    """
+    规则：
+    - 每日一次（与“签到”互不影响），记录到 user['last_extra_sign']
+    - 随机给出九段运势：大吉/吉/中吉/小吉/平/小凶/中凶/凶/大凶
+    - 仅根据运势增减玻璃珠，不增加好感度
+    - 运势好→祝福；运势差→鼓励；平→中性提示
+    """
+    user_name = event.get_sender_name()
+    user_id = self._get_user_id(event)
+    user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+    today = datetime.now().date().isoformat()
+    if user.get("last_extra_sign") == today:
+        yield event.plain_result(
+            f"🔒 {user_name}，今天已经进行过【勤勉签到】啦～\n"
+            f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+        )
+        return
+
+    diligent_lines = [
+        "今天也是勤勉的一天～",
+        "记录一下扎实的努力！",
+        "稳步前进就是胜利～",
+        "打卡！小目标正在靠近你～",
+        "今天的你也很棒哦~！",
+        "有在认真生活的味道～",
+        "努力被宇宙看见啦！",
+        "悄悄耕耘，静待花开～",
+        "积跬步以至千里！",
+        "继续保持，好状态在线～",
+        "今日功课√ 给自己点个赞！",
+        "进度条+1，能量值+1！",
+        "你在变好，小碎看得见～",
+        "今天也在认真打卡吗~（小碎鼓励的眼神）",
+        "坚持的人自带闪光～"
+    ]
+    diligent_text = random.choice(diligent_lines)
+
+    # 九段日式运势
+    luck_levels = ["大吉", "吉", "中吉", "小吉", "平", "小凶", "中凶", "凶", "大凶"]
+    level = random.choice(luck_levels)
+
+    # 对应玻璃珠区间
+    marble_ranges = {
+        "大吉": (180, 266),
+        "吉": (120, 200),
+        "中吉": (80, 160),
+        "小吉": (40, 100),
+        "平": (0, 60),
+        "小凶": (-20, 20),
+        "中凶": (-60, 0),
+        "凶": (-120, -40),
+        "大凶": (-200, -100),
+    }
+    desc = {
+        "大吉": "群星加护",
+        "吉": "好运相随",
+        "中吉": "顺水顺心",
+        "小吉": "稳步向前",
+        "平": "风平浪静",
+        "小凶": "略有波折",
+        "中凶": "阴云未散",
+        "凶": "注意节奏",
+        "大凶": "谨慎行事",
+    }
+
+    rmin, rmax = marble_ranges[level]
+    delta = random.randint(rmin, rmax)
+    delta = max(-266, min(266, delta))
+    user["marbles"] = user.get("marbles", 0) + delta
+
+    # 祝福 / 中性 / 鼓励
+    bless_pool = [
+        "好运加身，今天注定闪闪发光～",
+        "顺风顺水，连星星都在帮你许愿！",
+        "阳光正好，心想事成～"
+    ]
+    neutral_pool = [
+        "平稳是另一种幸福，慢慢走也能到达。",
+        "不焦不躁，保持节奏就是好兆头。",
+        "静水流深，平日的积累最可贵。"
+    ]
+    encourage_pool = [
+        "乌云只是暂时的，下一刻就是晴天。",
+        "先休息一下，明天会更顺。",
+        "困难是运气积蓄的前奏，撑一撑就见光。"
+    ]
+
+    if level in ("大吉", "吉", "中吉", "小吉"):
+        mood_line = f"🌟 {random.choice(bless_pool)}"
+    elif level == "平":
+        mood_line = f"🧭 {random.choice(neutral_pool)}"
+    else:
+        mood_line = f"🛡️ {random.choice(encourage_pool)}"
+
+    user["last_extra_sign"] = today
+    self._save_state()
+
+    def fmt_signed(n: int) -> str:
+        return f"+{n}" if n >= 0 else f"{n}"
+
+    reply = (
+        f"{diligent_text}\n"
+        f"📅 今日运势：**{level}（{desc[level]}）**\n"
+        f"🫧 玻璃珠变动：{fmt_signed(delta)}（不增加好感度）\n"
+        f"{mood_line}\n"
+        f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+    )
+    yield event.plain_result(reply)
+
+
+    res = await _try_drop_egg(self,event, is_interaction=True)
+    if res: yield res
+
+
+# ==== 彩蛋系统（被动触发 + 成就）========================================
+# 用法（请在以下指令最后面各加一行调用）：
+#   - 在“签到”、“我还要签到”、“占卜”、“投喂”的回复 yield 之后，追加：
+#       res = await _try_drop_egg(self,event, is_interaction=True)
+#       if res: yield res
+#   - 若你有一个“群内任意消息入口”（如总 on_message/默认回调），在合适位置追加：
+#       res = await _try_drop_egg(self,event, is_interaction=False)
+#       if res: yield res
+#
+# 说明：
+# - 群内任意消息：5% 掉落概率
+# - 日常互动（两个签到、占卜、投喂）：15% 掉落概率
+# - 特别彩蛋：固定每次 10% 概率独立判定（若命中则直接掉落特别彩蛋）
+# - 超稀有中有一个“传说彩蛋”全局 0.5% 概率（独立判定），奖励 300 好感 + 999 玻璃珠
+# - 不会掉重复彩蛋；若该稀有度已集齐，会自动回落/上浮到可用的稀有度
+# - 成就：集齐 1/10/25/40/50（全收集）、特别彩蛋全收集；触发即发放奖励
+# ======================================================================
+
+# （放在类里）
+async def _try_drop_egg(self, event: AstrMessageEvent, is_interaction: bool) -> MessageEventResult | None:
+    user_name = event.get_sender_name()
+    user_id = self._get_user_id(event)
+    user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+    # ── 初始化彩蛋/成就存档 ─────────────────────────────────────────────
+    store = self._state.setdefault("eggs", {})
+    u = store.setdefault(user_id, {
+        "collected": [],            # 存放 egg_id 列表（不重复）
+        "achievements": [],         # 已达成成就 key 列表
+        "special_collected": [],    # 已收集的“特别彩蛋” egg_id
+    })
+
+    # ── 定义彩蛋池（每种先给 3 个示例，其余你可继续补充到目标数量）────────
+    # 结构：("id", "标题", "正文内容（不含结尾奖励提示）", favor_delta, marbles_delta)
+    NORMAL_EGGS = [
+        ("n01", "【甜甜圈店的奇遇】", "和小碎一起吃到了超棒的草莓燕麦脆珠甜甜圈，意外地在甜甜圈上发现了玻璃珠点缀！", 5, 30),
+        ("n02", "【便利店的幸运签】", "小碎在发票上刮出了‘再来一瓶’的幸运字样，两人都笑了。", 8, 20),
+        ("n03", "【邮筒下的信封】", "风吹起的信封里掉出一枚亮晶晶的珠子，小碎帮忙捡了起来。", 10, 15),
+        ("n04", "【路边的猫】", "小碎蹲下摸了摸那只橘猫，猫打了个滚，露出一个闪光的小球。", 12, 25),
+        ("n05", "【掉落的糖纸】", "糖纸背后写着‘今天会有好事’，结果你脚边真的滚来一颗玻璃珠。", 8, 18),
+        ("n06", "【泡泡机的故障】", "泡泡里飞出一颗小珠子，小碎忙着追，结果你们都笑翻了。", 10, 20),
+        ("n07", "【夜晚的便利店灯】", "灯光闪了三下，柜台边反光的不是零钱，而是一颗漂亮的珠子。", 6, 25),
+        ("n07", "【夜晚的便利店灯】", "灯光闪了三下，柜台边反光的不是零钱，而是一颗漂亮的珠子。", 6, 25),
+        ("n08", "【公交卡的反面】", "小碎贴贴公交卡背面，发现印着一颗笑脸玻璃珠的图案，感觉被祝福了。", 15, 10),
+        ("n09", "【角落的糖果罐】", "最后一颗玻璃糖是心形的，小碎说：‘这是今天的好运！’", 10, 30),
+        ("n10", "【图书馆的回音】", "小碎在书页间发现一张旧书签，上面粘着一颗迷你珠子。", 6, 18),
+        ("n11", "【海边的贝壳】", "贝壳打开，里面藏着一颗像月亮一样的玻璃珠。", 15, 25),
+        ("n12", "【风车转动的瞬间】", "小碎拍下的照片里，多出了一道光点，那正是玻璃珠的倒影。", 12, 20),
+        ("n13", "【废弃游乐场】", "旋转木马启动了一下，地上掉出一个粉色珠子。", 8, 28),
+        ("n14", "【天台的风筝】", "线断了，但风筝带回一条缎带，上面缠着珠光。", 10, 25),
+        ("n15", "【午后的柠檬水】", "酸酸甜甜，小碎喝完一整杯，发现杯底的冰块里冻着颗玻璃珠！", 8, 35),
+        ("n16", "【路灯下的影子】", "两道影子交叠时，地上闪了下光，小碎惊呼：‘它在动！’", 5, 20),
+        ("n17", "【天桥上的彩带】", "风吹落的彩带挂在你手臂上，系着一颗蓝色小珠子。", 10, 30),
+        ("n18", "【车站的留言墙】", "‘要一起努力哦’，小碎指着那条留言笑了，旁边是一个闪亮标记。", 15, 15),
+        ("n19", "【海洋的声音】", "和小碎一起到海滩，听到人鱼们在歌唱，他们的眼泪化作了玻璃珠滚到脚边。", 12, 20),
+        ("n20", "【蛋糕店的点心】", "抹茶蛋糕上插着小碎做的旗子，下面藏了两颗玻璃珠。", 8, 40),
+        ("n21", "【自动售货机】", "买饮料多吐了一颗珠珠糖，味道居然是薄荷运气味。", 10, 15),
+        ("n22", "【街角旧相机】", "冲洗出的照片上闪着彩色反光，小碎说那是‘情绪的珠子’。", 10, 25),
+        ("n23", "【山丘上的风】", "风吹乱了头发，也吹来一颗珠子，小碎伸手接住。", 5, 35),
+        ("n24", "【纸飞机的终点】", "飞机降落在你的脚边，小碎在上面画了个笑脸。", 12, 20),
+        ("n25", "【猫头鹰的信】", "夜空里传来一声咕咕，信封掉落，里面是小碎画的珠子贴纸。", 15, 25),
+        # TODO: 补充至 25 个普通彩蛋
+    ]
+    RARE_EGGS = [
+        ("r01", "【流星下的约定】", "小碎许愿：‘如果有星星掉下来，就分你一半好运！’第二天地上真多了几颗珠子。", 20, 80),
+        ("r02", "【梦中的旋律】", "梦里小碎弹钢琴，音符变成闪光的玻璃珠飘起。", 25, 60),
+        ("r03", "【钟楼的碎片】", "钟声敲响时，掉下一片刻着花纹的玻璃片，光从中透出彩虹。", 15, 100),
+        ("r04", "【湖面的倒影】", "你与小碎低头看湖，水中星光汇成一颗大珠子。", 30, 70),
+        ("r05", "【雪天的手套】", "雪地里摸到小碎丢的手套，里面藏着一颗温热的珠子。", 20, 90),
+        ("r06", "【风铃的共鸣】", "小碎挂起的风铃在风中共振，风声带来了好运。", 25, 75),
+        ("r07", "【夜市的奖券】", "小碎抽中了‘特等奖’，奖品是一瓶装满玻璃珠的罐子！", 15, 120),
+        ("r08", "【旧车站的时刻表】", "上面手写着‘等好运的列车’，角落贴着一颗珠子。", 20, 90),
+        ("r09", "【烟花的残光】", "烟花散尽，‘每一次闪烁，都是你的一颗幸运珠。’", 25, 100),
+        ("r10", "【风中的回信】", "寄出的信没有名字，但回信附了一颗发光珠。", 30, 80),
+        # TODO: 补充至 10 个稀有彩蛋
+    ]
+    # 超稀有里包含一个“传说彩蛋”（id = u00），全局 0.5% 概率；其余奖励为两位/三位量级
+    ULTRA_EGGS = [
+        ("u00", "【群星玻璃匣】", "（恭喜达成最稀有彩蛋~！）小碎打开匣子，所有星星一齐闪烁——玻璃珠飞舞成环。", 300, 999),   # 传说彩蛋（最难）
+        ("u01", "【星辉折射镜】", "小碎用镜子对准夜空，所有星光都汇聚成你的名字。", 60, 200),
+        ("u02", "【时间夹缝票根】", "旧电影院的票根突然发光，时光倒流回最初的那天。", 100, 150),
+        ("u03", "【彩色万花筒】", "透过万花筒看世界，小碎发现每个图案中心都有颗珠子。", 50, 250),
+        ("u04", "【空中花园门票】", "风带来一张写着‘限时入场’的门票，小碎带你飞了上去。", 120, 120),
+        # TODO: 补充至 5 个超稀有彩蛋（含 u00 在内）
+    ]
+    # 特别彩蛋（与星露谷、饥荒、泰拉瑞亚相关）——固定 10% 独立概率
+    SPECIAL_EGGS = [
+        # 星露谷
+        ("s-sdv-01", "【星露谷·金星南瓜派】", "小碎帮忙烤南瓜派，结果烤盘里多了闪亮的珠子。", 25, 150),
+        ("s-sdv-02", "【星露谷·幸运午餐】", "午餐香气扑鼻，小碎咬下一口后：‘今天会超顺利的！’", 20, 100),
+        ("s-sdv-03", "【星露谷·古代水果酒】", "酒香飘满农场，瓶底藏着一颗古老的珠子。", 15, 200),
+        ("s-sdv-04", "【星露谷·火山地牢】", "熔岩菇闪着红光，小碎摘下最大的一颗递给你。", 30, 120),
+        ("s-sdv-05", "【星露谷·春】", "春天里花瓣徐徐飘落，小碎从风中捞到一颗玻璃珠。", 25, 130),
+        ("s-sdv-06", "【星露谷·流星田边】", "夜里的农田被流星照亮，一颗珠子嵌在土里发光。", 20, 160),
+        # 饥荒
+        ("s-dst-01", "【饥荒·猪王的馈赠】", "猪王开心地丢出三颗珠子，小碎接得飞快。", 15, 180),
+        ("s-dst-02", "【饥荒·舞台剧】", "影子伸手递来礼物，小碎微笑着收下。", 25, 150),
+        # 泰拉瑞亚
+        ("s-ter-01", "【泰拉瑞亚·红心水晶】", "砸碎红心后，小碎心跳了一下，地上出现两颗珠子。", 20, 200),
+        ("s-ter-02", "【泰拉瑞亚·月总的余晖】", "月亮领主化作光，化成珠雨落下。", 40, 250),
+        # TODO: 补充至 10 个特别彩蛋（可按三作继续扩展）
+    ]
+
+    # 快速索引：已拥有
+    owned = set(u["collected"])
+    owned_special = set(u["special_collected"])
+
+    # ── 概率设定 ──────────────────────────────────────────────────────
+    # 基础掉落概率：互动 20%，普通消息 5%
+    base_p = 0.20 if is_interaction else 0.05
+
+    # 特别彩蛋：固定 10% 独立判定（若命中则直接走特别彩蛋逻辑）
+    from random import random, choice
+
+    # 1) 先判定特别彩蛋（独立）
+    if random() < 0.10:
+        # 可选的特别彩蛋（去重）
+        avail = [e for e in SPECIAL_EGGS if e[0] not in owned_special]
+        if not avail:
+            # 特别彩蛋已集齐，继续进入普通概率流
+            pass
+        else:
+            egg = choice(avail)
+            return await _award_egg_and_achievements(self,event, user_name, user_id, user, u, egg, rarity_tag="特别彩蛋")
+
+    # 2) 然后判定基础掉落
+    if random() >= base_p:
+        return None
+
+    # 3) 传说彩蛋全局 0.5% 独立触发（若未获得）
+    mythic = next((e for e in ULTRA_EGGS if e[0] == "u00"), None)
+    if mythic and mythic[0] not in owned and random() < 0.005:
+        return await _award_egg_and_achievements(self,event, user_name, user_id, user, u, mythic, rarity_tag="超稀有彩蛋")
+
+    # 4) 稀有度权重抽取（可按需微调）
+    #    普通 82%，稀有 17%，超稀有 1%
+    roll = random()
+    if roll < 0.82:
+        pool, tag = NORMAL_EGGS, "普通彩蛋"
+    elif roll < 0.99:
+        pool, tag = RARE_EGGS, "稀有彩蛋"
+    else:
+        pool, tag = ULTRA_EGGS, "超稀有彩蛋"
+
+    # 按稀有度挑未拥有
+    avail = [e for e in pool if e[0] not in owned]
+    # 若该池已空，则尝试回落/上浮寻找可用彩蛋
+    if not avail:
+        fallback_order = [NORMAL_EGGS, RARE_EGGS, ULTRA_EGGS]
+        for p in fallback_order:
+            cand = [e for e in p if e[0] not in owned]
+            if cand:
+                avail = cand
+                tag = "普通彩蛋" if p is NORMAL_EGGS else ("稀有彩蛋" if p is RARE_EGGS else "超稀有彩蛋")
+                break
+    if not avail:
+        # 全部收集完毕则不给重复；可以在此提示“已全收集”
+        return None
+
+    egg = choice(avail)
+    return await _award_egg_and_achievements(self,event, user_name, user_id, user, u, egg, rarity_tag=tag)
+
+# 负责发放奖励 + 成就检测 + 文案输出
+async def _award_egg_and_achievements(self, event: AstrMessageEvent, user_name: str, user_id: str,
+                                      user: dict, ustate: dict, egg_tuple: tuple, rarity_tag: str) -> MessageEventResult:
+    egg_id, title, body, f_inc, m_inc = egg_tuple
+
+    # 写入收集
+    if rarity_tag == "特别彩蛋":
+        if egg_id not in ustate["special_collected"]:
+            ustate["special_collected"].append(egg_id)
+    if egg_id not in ustate["collected"]:
+        ustate["collected"].append(egg_id)
+
+    # 发奖励
+    user["favor"] += int(f_inc)
+    user["marbles"] += int(m_inc)
+
+    # 成就检查
+    achieve_msgs = _check_and_award_achievements(self,user_name, user_id, user, ustate)
+
+    # 落盘
+    self._save_state()
+
+    # 文案（与示例格式一致）
+    reply = (
+        f"{rarity_tag}*{title}{body} 小碎好感+{f_inc}，玻璃珠+{m_inc}。\n"
+        + ("\n".join(achieve_msgs) + ("\n" if achieve_msgs else ""))
+        + f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+    )
+    return event.plain_result(reply)
+
+def _check_and_award_achievements(self, user_name: str, user_id: str, user: dict, ustate: dict) -> list[str]:
+    msgs = []
+    owned = set(ustate.get("collected", []))
+    owned_special = set(ustate.get("special_collected", []))
+    done = set(ustate.get("achievements", []))
+
+    # 成就定义（key, 触发条件函数, 奖励favor, 奖励marbles, 展示名）
+    ACHIEVEMENTS = [
+        ("a01_any_1",    lambda: len(owned) >= 1,   2,   5,   "「小碎的第一颗蛋」 —— 小碎开心地举起它，眼睛闪闪发光。"),
+        ("a02_any_10",   lambda: len(owned) >= 10, 10,  30,   "「彩蛋连连看」 —— 你的篮子叮叮当当，越来越重啦～"),
+        ("a03_any_25",   lambda: len(owned) >= 25, 20,  80,   "「珍重的回忆」 —— 旅程已经过了一半。"),
+        ("a04_any_40",   lambda: len(owned) >= 40, 40, 150,   "「叮咚！小碎的惊喜仓库」 —— 彩蛋多到小碎要数不过来了！"),
+        ("a05_all_50",   lambda: len(owned) >= 50, 100, 500,  "「小碎的终极闪闪收藏」 —— 全部集齐，连星星都在鼓掌～"),
+        ("a06_sp_all",   lambda: len(owned_special) >= 10, 60, 300, "「特别蛋大冒险！」 —— 小碎和你跑遍世界，收集到了所有的奇迹！"),
+    ]
+
+    for key, cond, fav, marb, title in ACHIEVEMENTS:
+        if key not in done and cond():
+            done.add(key)
+            ustate["achievements"] = list(done)
+            user["favor"] += fav
+            user["marbles"] += marb
+            # 小碎恭喜语（全收集与特别全收集更激动一些）
+            if key in ("a05_all_50", "a06_sp_all"):
+                exclaim = "哇——太厉害了！" if key == "a06_sp_all" else "天哪，了不起！"
+                msgs.append(
+                    f"🎖️ {user_name}，恭喜你触发了【{title}】成就！{exclaim}小碎送你 好感+{fav}、玻璃珠+{marb}～"
+                )
+            else:
+                msgs.append(
+                    f"🏅 {user_name}，恭喜你触发了【{title}】成就！小碎送你 好感+{fav}、玻璃珠+{marb}～"
+                )
+
+    return msgs
+
+# ---- 新增指令：查看成就 ----
+@filter.command("查看成就")
+async def check_achievements(self, event: AstrMessageEvent):
+    """查看已解锁的成就与收集进度"""
+    user_name = event.get_sender_name()
+    user_id = self._get_user_id(event)
+    eggs_state = self._state.get("eggs", {})
+    u = eggs_state.get(user_id)
+
+    if not u:
+        yield event.plain_result(f"{user_name} 还没有发现任何彩蛋呢～快去探索看看吧 (๑•̀ㅂ•́)و✧")
+        return
+
+    collected = u.get("collected", [])
+    specials = u.get("special_collected", [])
+    achievements = u.get("achievements", [])
+
+    # 全部成就列表（与彩蛋系统定义保持一致）
+    ACHIEVEMENTS_INFO = {
+        "a01_any_1":  "「小碎的第一颗蛋」 —— 小碎开心地举起它，眼睛闪闪发光。",
+        "a02_any_10": "「彩蛋连连看」 —— 你的篮子叮叮当当，越来越重啦～",
+        "a03_any_25": "「珍重的回忆」 —— 旅程已经过了一半。",
+        "a04_any_40": "「叮咚！小碎的惊喜仓库」 —— 彩蛋多到小碎要数不过来了！",
+        "a05_all_50": "「小碎的终极闪闪收藏」 —— 全部集齐，连星星都在鼓掌～",
+        "a06_sp_all": "「特别蛋大冒险！」 —— 小碎和你跑遍世界，收集到了所有的奇迹！",
+    }
+
+    unlocked_names = [ACHIEVEMENTS_INFO[a] for a in achievements if a in ACHIEVEMENTS_INFO]
+    locked_names = [ACHIEVEMENTS_INFO[a] for a in ACHIEVEMENTS_INFO if a not in achievements]
+
+    reply = (
+        f"📜 小碎的成就册：\n"
+        f"——— 已解锁 ——\n"
+        + (("\n".join(f"✅ {n}" for n in unlocked_names)) if unlocked_names else "暂无成就～\n")
+        + "\n——— 未解锁 ——\n"
+        + (("\n".join(f"🔒 {n}" for n in locked_names)) if locked_names else "全部解锁啦！🌟")
+        + f"\n\n🥚 彩蛋收集进度：{len(collected)}/50"
+        + f"\n✨ 特别彩蛋收集进度：{len(specials)}/10"
+    )
+    yield event.plain_result(reply)
+
+
+
+@filter.command("程序员彩蛋测试")
+async def dev_force_egg(self, event: AstrMessageEvent):
+    """
+    开发者用：固定掉落一个普通彩蛋（n01），不依赖内部私有方法。
+    仅用于快速验证：掉落、去重与奖励结算是否正常（不触发成就）。
+    """
+    user_name = event.get_sender_name()
+    user_id = self._get_user_id(event)
+    user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+    # 初始化彩蛋存档
+    store = self._state.setdefault("eggs", {})
+    u = store.setdefault(user_id, {
+        "collected": [],
+        "achievements": [],
+        "special_collected": [],
+    })
+
+    egg = ("n01", "【甜甜圈店的奇遇】", "和小碎一起吃到了超棒的草莓燕麦脆珠甜甜圈，意外地在甜甜圈上发现了玻璃珠点缀！", 5, 30)
+
+    # 去重：已收集就提示
+    if egg[0] in set(u.get("collected", [])):
+        yield event.plain_result(
+            f"普通彩蛋*{egg[1]}你已经拥有啦～\n"
+            f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+        )
+        return
+
+    # 写入与结算
+    u["collected"].append(egg[0])
+    user["favor"] = user.get("favor", 0) + egg[3]
+    user["marbles"] = user.get("marbles", 0) + egg[4]
+    self._save_state()
+
+    # 展示
+    yield event.plain_result(
+        f"普通彩蛋*{egg[1]}{egg[2]} 小碎好感+{egg[3]}，玻璃珠+{egg[4]}。\n"
+        f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
+    )
+
+
+
+    
 
 
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
         self._save_state()
-
-    def _time_period(self) -> str:
-        """根据本地时间返回时段标签"""
-        hour = datetime.now().hour
-        if 5 <= hour < 11:
-            return "morning"
-        if 11 <= hour < 14:
-            return "noon"
-        if 14 <= hour < 18:
-            return "afternoon"
-        if 18 <= hour < 24:
-            return "evening"
-        return "midnight"
