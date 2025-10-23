@@ -88,99 +88,100 @@ class MyPlugin(Star):
         ]
         yield event.plain_result(random.choice(replies))
 
-# ---- 新增指令：签到（已加“每日一次”限制） ----
-@filter.command("签到")
-async def sign_in(self, event: AstrMessageEvent):
-    """根据时间段打招呼 + 随机获得好感度与玻璃珠，并记录到背包；每日仅可签到一次"""
-    user_name = event.get_sender_name()
-    user_id = self._get_user_id(event)
+    # ---- 新增指令：签到（已加“每日一次”限制） ----
+    @filter.command("签到")
+    async def sign_in(self, event: AstrMessageEvent):
+        """根据时间段打招呼 + 随机获得好感度与玻璃珠，并记录到背包；每日仅可签到一次"""
+        user_name = event.get_sender_name()
+        user_id = self._get_user_id(event)
 
-    # ——【保持原样：每天只能签到一次的校验】——
-    today = datetime.now().date().isoformat()
-    user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
-    if user.get("last_sign") == today:
-        yield event.plain_result(
-            f"{user_name}，今天已经签过到啦～\n当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
-        )
-        return
-    # ——【校验结束】——
 
-    # ——【新增①：不引入任何全局键，直接用当前“已签到人数”推算名次】——
-    # 统计今天已经签到过的用户数量（此时还未给当前用户标记 last_sign）
-    rank_today = 1 + sum(
-        1 for u in self._state["users"].values()
-        if u.get("last_sign") == today
-    )
-    # ——【新增①结束】——
+    # ——【新增：用于记录每天的签到人数】——
+    sign_counts = self._state.setdefault(\"sign_counts\", {})  # { \"YYYY-MM-DD\": int }
+    # ——【新增结束】——
+        # ——【新增：每天只能签到一次的校验】——
+        today = datetime.now().date().isoformat()
+        user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+        if user.get("last_sign") == today:
+            yield event.plain_result(
+                f"{user_name}，今天已经签过到啦～\n当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
+            )
+            return
+        # ——【新增结束】——
+    # ——【新增：计算今天的签到名次（仅在未签到分支计算）】——
+    rank_today = sign_counts.get(today, 0) + 1
+    # ——【新增结束】——
 
-    period = self._time_period()
-    pool = {
-        "morning": [
-            f"早安，{user_name}！小碎为你点亮新的一天～",
-            f"{user_name} 早呀！今天也一起加油！",
-            f"清晨好，{user_name}～来摸摸小碎提提神！",
-            f"小碎送来一杯热可可，{user_name} 早上好！",
-            f"新的一天，从和小碎说早安开始吧，{user_name}～",
-            f"晨光正好，{user_name}～"
-        ],
-        "noon": [
-            f"午间好，{user_name}～记得补充能量哦！",
-            f"{user_name} 午好！小碎给你加点效率 BUFF～",
-            f"小憩一下吧，{user_name}～小碎守着你！",
-            f"咕噜咕噜～午饭好吃吗 {user_name}？",
-            f"精神满满的下午从饱饱的中午开始！{user_name}～",
-            f"午安～{user_name}，小碎在线待命！"
-        ],
-        "afternoon": [
-            f"下午好，{user_name}～小碎陪你继续冲刺！",
-            f"{user_name}，下午的太阳刚刚好～",
-            f"来点小甜点如何？小碎请你～",
-            f"保持专注，{user_name}～小碎给你打气！",
-            f"嗷嗷～{user_name}，小碎在这儿守护你！",
-            f"下午茶时间到～{user_name} 要不要来一口？"
-        ],
-        "evening": [
-            f"晚上好，{user_name}～要不要一起放松下？",
-            f"{user_name} 辛苦啦！小碎给你舒缓一下～",
-            f"夜色真美，{user_name}～小碎也在！",
-            f"来听会儿歌吧，{user_name}～小碎陪你～",
-            f"收工快乐，{user_name}！小碎为你点亮小灯灯～",
-            f"晚风轻拂～{user_name}，小碎在这儿～"
-        ],
-        "midnight": [
-            f"半夜啦，{user_name}～注意休息哦，小碎抱抱～",
-            f"{user_name} 还没睡呀？小碎小声陪你～",
-            f"夜深了，{user_name}～要不要喝点热牛奶？",
-            f"小碎给你盖小被子～{user_name} 晚安前的签到也很可爱！",
-            f"星星眨眼睛～{user_name}，小碎悄悄上线～",
-            f"夜猫子小队集合！{user_name}～小碎打卡到！"
-        ],
-    }
 
-    greet = random.choice(pool[period])
+        period = self._time_period()
+        pool = {
+            "morning": [
+                f"早安，{user_name}！小碎为你点亮新的一天～",
+                f"{user_name} 早呀！今天也一起加油！",
+                f"清晨好，{user_name}～来摸摸小碎提提神！",
+                f"小碎送来一杯热可可，{user_name} 早上好！",
+                f"新的一天，从和小碎说早安开始吧，{user_name}～",
+                f"晨光正好，{user_name}～"
+            ],
+            "noon": [
+                f"午间好，{user_name}～记得补充能量哦！",
+                f"{user_name} 午好！小碎给你加点效率 BUFF～",
+                f"小憩一下吧，{user_name}～小碎守着你！",
+                f"咕噜咕噜～午饭好吃吗 {user_name}？",
+                f"精神满满的下午从饱饱的中午开始！{user_name}～",
+                f"午安～{user_name}，小碎在线待命！"
+            ],
+            "afternoon": [
+                f"下午好，{user_name}～小碎陪你继续冲刺！",
+                f"{user_name}，下午的太阳刚刚好～",
+                f"来点小甜点如何？小碎请你～",
+                f"保持专注，{user_name}～小碎给你打气！",
+                f"嗷嗷～{user_name}，小碎在这儿守护你！",
+                f"下午茶时间到～{user_name} 要不要来一口？"
+            ],
+            "evening": [
+                f"晚上好，{user_name}～要不要一起放松下？",
+                f"{user_name} 辛苦啦！小碎给你舒缓一下～",
+                f"夜色真美，{user_name}～小碎也在！",
+                f"来听会儿歌吧，{user_name}～小碎陪你～",
+                f"收工快乐，{user_name}！小碎为你点亮小灯灯～",
+                f"晚风轻拂～{user_name}，小碎在这儿～"
+            ],
+            "midnight": [
+                f"半夜啦，{user_name}～注意休息哦，小碎抱抱～",
+                f"{user_name} 还没睡呀？小碎小声陪你～",
+                f"夜深了，{user_name}～要不要喝点热牛奶？",
+                f"小碎给你盖小被子～{user_name} 晚安前的签到也很可爱！",
+                f"星星眨眼睛～{user_name}，小碎悄悄上线～",
+                f"夜猫子小队集合！{user_name}～小碎打卡到！"
+            ],
+        }
 
-    favor_inc = random.randint(0, 30)
-    marbles_inc = random.randint(0, 30)
+        greet = random.choice(pool[period])
 
-    # 落库（保持原逻辑）
-    user["favor"] += favor_inc
-    user["marbles"] += marbles_inc
-    user["last_sign"] = today
-    self._save_state()
+        favor_inc = random.randint(0, 30)
+        marbles_inc = random.randint(0, 30)
 
-    # ——【新增②：把“排名”合并到同一条消息最前面】——
-    reply = (
-        f"你是今天第{rank_today}位签到的~\n"
+        # 此处直接使用上面已获取/创建的 user
+        user["favor"] += favor_inc
+        user["marbles"] += marbles_inc
+        user["last_sign"] = today  # 记录今天已签到
+    # ——【新增：写回当天签到总数】——
+    sign_counts[today] = rank_today
+    # ——【新增结束】——
+
+        self._save_state()
+
+        reply = (
+                    f\"你是今天第{rank_today}位签到的~\n\"
         f"{greet}\n"
-        f"签到成功啦～小碎好感度 +{favor_inc}，小碎赠予你 {marbles_inc} 颗玻璃珠。\n"
-        f"当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
-    )
-    # ——【新增②结束】——
+            f"签到成功啦～小碎好感度 +{favor_inc}，小碎赠予你 {marbles_inc} 颗玻璃珠。\n"
+            f"当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
+        )
+        yield event.plain_result(reply)
 
-    yield event.plain_result(reply)
-
-    res = await _try_drop_egg(self,event, is_interaction=True)
-    if res: yield res
+        res = await _try_drop_egg(self,event, is_interaction=True)
+        if res: yield res
 
     
     # ---- 新版：占卜（每日一次，内联数据，仅三组牌）----
