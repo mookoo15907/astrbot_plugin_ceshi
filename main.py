@@ -88,6 +88,20 @@ class MyPlugin(Star):
         ]
         yield event.plain_result(random.choice(replies))
 
+    @filter.command("抽签")
+    async def draw_lot(self, event: AstrMessageEvent, upper_bound: str = ""):
+        """抽签 数字：随机返回 1 到指定正整数之间的一个整数（含两端）。"""
+        try:
+            maximum = int(upper_bound)
+        except ValueError:
+            maximum = 0
+
+        if maximum < 1:
+            yield event.plain_result("请输入正整数哦～例如：抽签 90")
+            return
+
+        yield event.plain_result(str(random.randint(1, maximum)))
+
     # ---- 新增指令：签到（已加“每日一次”限制） ----
     @filter.command("签到")
     async def sign_in(self, event: AstrMessageEvent):
