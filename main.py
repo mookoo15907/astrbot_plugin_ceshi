@@ -5,9 +5,33 @@ from astrbot.api import logger
 import random
 import json
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
-@register("helloworld", "YourName", "一个简单的 Hello World 插件", "1.0.0")
+BEIJING_TIME = timezone(timedelta(hours=8))
+DAILY_LUCK_LEVELS = ("大凶", "凶", "中凶", "小凶", "平", "小吉", "中吉", "吉", "大吉")
+
+
+def _daily_luck_level(value: int) -> str:
+    """同一个基础值对应固定的九段日运势。"""
+    return DAILY_LUCK_LEVELS[min(8, value * 9 // 101)]
+
+
+def _divination_rating(value: int) -> str:
+    """按运气分数选择已有等级，不改写塔罗牌原本的含义。"""
+    for threshold, rating in ((95, "SSS"), (81, "SS"), (61, "S"),
+                              (41, "B"), (26, "C"), (11, "D")):
+        if value >= threshold:
+            return rating
+    return "F"
+
+
+def _moment_luck(value: int) -> int:
+    """八成在每日值附近波动，两成完全随机，保留当下的意外。"""
+    if random.random() < 0.8:
+        return random.randint(max(0, value - 25), min(100, value + 25))
+    return random.randint(0, 100)
+
+@register("helloworld", "YourName", "一个简单的 Hello World 插件", "1.2.0")
 class MyPlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
@@ -54,6 +78,17 @@ class MyPlugin(Star):
         except Exception:
             pass
         return f"name::{event.get_sender_name()}"
+
+    def _get_daily_luck(self, user: dict, today: str) -> int:
+        """首次生成即保存；同用户跨指令、跨群及重载共享当天的值。"""
+        record = user.get("daily_luck")
+        if (isinstance(record, dict) and record.get("date") == today
+                and type(record.get("value")) is int and 0 <= record["value"] <= 100):
+            return record["value"]
+        value = random.randint(0, 100)
+        user["daily_luck"] = {"date": today, "value": value}
+        self._save_state()
+        return value
 
     def _time_period(self, now: datetime | None = None) -> str:
         """按小时划分时间段：早上/中午/下午/晚上/半夜"""
@@ -110,11 +145,14 @@ class MyPlugin(Star):
         user_id = self._get_user_id(event)
 
         # ——【新增：每天只能签到一次的校验】——
-        today = datetime.now().date().isoformat()
+        now = datetime.now(BEIJING_TIME)
+        today = now.date().isoformat()
         user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+        daily_luck = self._get_daily_luck(user, today)
         if user.get("last_sign") == today:
             yield event.plain_result(
-                f"{user_name}，今天已经签过到啦～\n当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
+                f"{user_name}，今天已经签过到啦～\n🍀 今日基础运气：{daily_luck}%\n"
+                f"当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
             )
             return
         # ——【新增结束】——
@@ -128,7 +166,7 @@ class MyPlugin(Star):
         # ——【最笨法结束】——
 
 
-        period = self._time_period()
+        period = self._time_period(now)
         pool = {
             "morning": [
                 f"你是今天第{rank_today}位签到的~\n早安，{user_name}！小碎为你点亮新的一天～",
@@ -185,6 +223,7 @@ class MyPlugin(Star):
 
         reply = (
             f"{greet}\n"
+            f"🍀 今日基础运气：{daily_luck}%\n"
             f"签到成功啦～小碎好感度 +{favor_inc}，小碎赠予你 {marbles_inc} 颗玻璃珠。\n"
             f"当前好感度：{user['favor']}｜玻璃珠：{user['marbles']}"
         )
@@ -194,13 +233,13 @@ class MyPlugin(Star):
         if res: yield res
 
     
-    # ---- 新版：占卜（每日一次，内联数据，仅三组牌）----
+    # ---- 占卜（每日一次，22 张牌的正逆位与每日运气联动）----
     @filter.command("占卜")
     async def divination(self, event: AstrMessageEvent):
         """
         每日仅可占卜一次：
         - 首次占卜扣 20 玻璃珠
-        - 随机抽取 22 大阿卡那中的前三组（愚者/魔术师/女祭司，含正逆）
+        - 在每日基础运气附近 ±10 分浮动，匹配等级后选取 22 张牌的正/逆位
         - 展示等级（SSS/SS/S/B/C/D/F）和中文形容，并根据好/波动/坏给祝福或安慰
         - 玻璃珠增减区间受等级影响（最终裁切到 ±266）
         - 好感度 +0~50，与牌面无关
@@ -211,10 +250,12 @@ class MyPlugin(Star):
         user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
 
         # 每日一次
-        today = datetime.now().date().isoformat()
+        today = datetime.now(BEIJING_TIME).date().isoformat()
+        daily_luck = self._get_daily_luck(user, today)
         if user.get("last_divine") == today:
             yield event.plain_result(
                 f"🔒 {user_name}，今天已经占卜过啦～明天再来试试吧！\n"
+                f"🍀 今日基础运气：{daily_luck}%\n"
                 f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
             )
             return
@@ -243,7 +284,7 @@ class MyPlugin(Star):
             "F":   (-266, -120),
         }
 
-        # 仅前三组牌（正/逆）
+        # 22 张大阿卡那（正/逆）；保留每个牌面的原有等级与解释。
         CARDS = {
             "愚者": {
                 "upright":  {"core": "自由", "type": "SS",  "keywords": ["起点","冒险","单纯","信任","未知","旅途"], "interp": "拥抱未知，轻装上路会带来新鲜突破。"},
@@ -335,12 +376,14 @@ class MyPlugin(Star):
             },
         }
 
-        # 随机抽牌与正逆
-        card_name = random.choice(list(CARDS.keys()))
-        upright = random.choice([True, False])
-        orient = "upright" if upright else "reversed"
+        # 每日运气决定大方向，少量波动允许邻近等级变化。
+        divine_luck = random.randint(max(0, daily_luck - 10), min(100, daily_luck + 10))
+        target_rating = _divination_rating(divine_luck)
+        candidates = [(name, orientation) for name, meanings in CARDS.items()
+                      for orientation, meaning in meanings.items() if meaning["type"] == target_rating]
+        card_name, orient = random.choice(candidates)
         m = CARDS[card_name][orient]
-        orient_cn = "正位" if upright else "逆位"
+        orient_cn = "正位" if orient == "upright" else "逆位"
         rating = m["type"]
 
         # 玻璃珠增减（按等级），并裁切到 ±266
@@ -356,7 +399,7 @@ class MyPlugin(Star):
         bonus_text = ""
         if rating == "SSS" and random.random() < 0.10:
             bonus = 999
-            bonus_text = "\n🎉 中奖时刻！群星垂青，额外获得 **999** 颗玻璃珠！"
+            bonus_text = "\n🎉 中奖时刻！群星垂青，额外获得 999 颗玻璃珠！"
 
         # 好/波动/坏 -> 祝福/安慰
         if rating in ("SSS", "SS", "S"):
@@ -392,10 +435,11 @@ class MyPlugin(Star):
         keywords = "、".join(m["keywords"][:6])
 
         reply = (
-            f"🔮 我收取了 **{fee}** 枚玻璃珠作为占卜费用……\n"
-            f"✨ 本次是 **{card_name}·{orient_cn}**\n"
-            f"等级：**{rating}（{rating_word}）**\n"
-            f"核心：**{m['core']}**｜其它：{keywords}\n"
+            f"🍀 今日基础运气：{daily_luck}%\n"
+            f"🔮 我收取了 {fee} 枚玻璃珠作为占卜费用……\n"
+            f"✨ 本次是 {card_name}·{orient_cn}\n"
+            f"🌟 等级：{rating}（{rating_word}）\n"
+            f"💫 核心：{m['core']}｜其它：{keywords}\n"
             f"🔎 解析：{m['interp']}\n"
             f"{mood_line}\n"
             f"💗 小碎好感度 {fmt_signed(favor_inc)}，"
@@ -533,13 +577,16 @@ class MyPlugin(Star):
 @filter.command("运势")
 async def fortune(self, event: AstrMessageEvent):
     """
-    随机给出 0~100 的当下运势值。
+    给出 0~100 的当下运势值：80% 在每日基础值 ±25 内，20% 完全随机。
     - 运势=0：安慰并赠送 3 颗玻璃珠（含鼓励话术）
     - 运势=100：+10 好感度，+50 玻璃珠（含祝福话术）
     """
     user_name = event.get_sender_name()
     user_id = self._get_user_id(event)
     user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
+
+    today = datetime.now(BEIJING_TIME).date().isoformat()
+    daily_luck = self._get_daily_luck(user, today)
 
     FACES = [
         "(๑•̀ㅂ•́)و✧", "(つ´ω`)つ", "(*/ω＼*)", "(๑ᵔ⤙ᵔ๑)", "(=^･ω･^=)",
@@ -548,9 +595,10 @@ async def fortune(self, event: AstrMessageEvent):
     ]
     face = random.choice(FACES)
 
-    x = random.randint(0, 100)
+    x = _moment_luck(daily_luck)
 
-    base_line = f"你当下的运势是 {x}，顺带一提，运势是百分制的哦~ {face}"
+    base_line = (f"🍀 今日基础运气：{daily_luck}%\n"
+                 f"你当下的运势是 {x}，顺带一提，运势是百分制的哦~ {face}")
 
     # 特殊分支：0 与 100
     if x == 0:
@@ -600,7 +648,7 @@ async def extra_sign_in(self, event: AstrMessageEvent):
     """
     规则：
     - 每日一次（与“签到”互不影响），记录到 user['last_extra_sign']
-    - 随机给出九段运势：大吉/吉/中吉/小吉/平/小凶/中凶/凶/大凶
+    - 根据每日基础运气给出九段运势：大吉/吉/中吉/小吉/平/小凶/中凶/凶/大凶
     - 仅根据运势增减玻璃珠，不增加好感度
     - 运势好→祝福；运势差→鼓励；平→中性提示
     """
@@ -608,10 +656,12 @@ async def extra_sign_in(self, event: AstrMessageEvent):
     user_id = self._get_user_id(event)
     user = self._state["users"].setdefault(user_id, {"favor": 0, "marbles": 0})
 
-    today = datetime.now().date().isoformat()
+    today = datetime.now(BEIJING_TIME).date().isoformat()
+    daily_luck = self._get_daily_luck(user, today)
     if user.get("last_extra_sign") == today:
         yield event.plain_result(
             f"🔒 {user_name}，今天已经进行过【勤勉签到】啦～\n"
+            f"🍀 今日基础运气：{daily_luck}%\n"
             f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
         )
         return
@@ -635,9 +685,8 @@ async def extra_sign_in(self, event: AstrMessageEvent):
     ]
     diligent_text = random.choice(diligent_lines)
 
-    # 九段日式运势
-    luck_levels = ["大吉", "吉", "中吉", "小吉", "平", "小凶", "中凶", "凶", "大凶"]
-    level = random.choice(luck_levels)
+    # 九段日式运势与当天的基础值一致。
+    level = _daily_luck_level(daily_luck)
 
     # 对应玻璃珠区间
     marble_ranges = {
@@ -700,7 +749,8 @@ async def extra_sign_in(self, event: AstrMessageEvent):
 
     reply = (
         f"{diligent_text}\n"
-        f"📅 今日运势：**{level}（{desc[level]}）**\n"
+        f"🍀 今日基础运气：{daily_luck}%\n"
+        f"📅 今日运势：{level}（{desc[level]}）\n"
         f"🫧 玻璃珠变动：{fmt_signed(delta)}（不增加好感度）\n"
         f"{mood_line}\n"
         f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
@@ -898,7 +948,7 @@ async def _award_egg_and_achievements(self, event: AstrMessageEvent, user_name: 
 
     # 文案（与示例格式一致）
     reply = (
-        f"{rarity_tag}*{title}{body} 小碎好感+{f_inc}，玻璃珠+{m_inc}。\n"
+        f"{rarity_tag} ✨ {title}{body} 小碎好感+{f_inc}，玻璃珠+{m_inc}。\n"
         + ("\n".join(achieve_msgs) + ("\n" if achieve_msgs else ""))
         + f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
     )
@@ -1005,7 +1055,7 @@ async def dev_force_egg(self, event: AstrMessageEvent):
     # 去重：已收集就提示
     if egg[0] in set(u.get("collected", [])):
         yield event.plain_result(
-            f"普通彩蛋*{egg[1]}你已经拥有啦～\n"
+            f"普通彩蛋 ✨ {egg[1]}你已经拥有啦～\n"
             f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
         )
         return
@@ -1018,7 +1068,7 @@ async def dev_force_egg(self, event: AstrMessageEvent):
 
     # 展示
     yield event.plain_result(
-        f"普通彩蛋*{egg[1]}{egg[2]} 小碎好感+{egg[3]}，玻璃珠+{egg[4]}。\n"
+        f"普通彩蛋 ✨ {egg[1]}{egg[2]} 小碎好感+{egg[3]}，玻璃珠+{egg[4]}。\n"
         f"📦 当前背包｜好感度：{user.get('favor',0)}｜玻璃珠：{user.get('marbles',0)}"
     )
 
