@@ -31,7 +31,7 @@ def _moment_luck(value: int) -> int:
         return random.randint(max(0, value - 25), min(100, value + 25))
     return random.randint(0, 100)
 
-@register("helloworld", "YourName", "一个简单的 Hello World 插件", "1.2.0")
+@register("helloworld", "YourName", "一个简单的 Hello World 插件", "1.3.0")
 class MyPlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
@@ -39,6 +39,11 @@ class MyPlugin(Star):
         self._data_dir = Path(__file__).parent / "data"
         self._data_path = self._data_dir / "xiaosui_state.json"
         self._state = {"users": {}}  # { user_id: {"favor": int, "marbles": int, "last_sign": "YYYY-MM-DD"} }
+        # 图片随插件安装；使用插件自身位置，避免依赖服务器工作目录。
+        self._sticker_paths = tuple(
+            path for path in sorted(Path(__file__).resolve().parent.glob("xiaosui_sticker_*.jpg"))
+            if path.is_file()
+        )
 
     async def initialize(self):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
@@ -105,6 +110,26 @@ class MyPlugin(Star):
 
 
     # ---- 已有指令：小碎（保留随机多语气） ----
+    @filter.command("购买方式")
+    async def purchase_guide(self, event: AstrMessageEvent):
+        """只展示固定相册入口，不读取或修改用户存档。"""
+        event.stop_event()
+        user_name = event.get_sender_name()
+        yield event.plain_result(
+            f"{user_name} 请看群相册《上新预告》哦\n"
+            "具体规则和开始时间在对应图片界面有进行标注～"
+        )
+
+    @filter.command("小碎表情包")
+    async def random_sticker(self, event: AstrMessageEvent):
+        """每次被呼唤仅回复一张原图，不发额外文字或触发奖励。"""
+        event.stop_event()
+        available = tuple(path for path in self._sticker_paths if path.is_file())
+        if not available:
+            yield event.plain_result("小碎暂时找不到表情包，等管理员补上图片后再来试试吧～")
+            return
+        yield event.image_result(str(random.choice(available)))
+
     @filter.command("小碎")
     async def helloworld(self, event: AstrMessageEvent):
         """这是一个 hello world 指令"""

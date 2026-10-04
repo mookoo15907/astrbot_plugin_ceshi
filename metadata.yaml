@@ -1,5 +1,5 @@
 name: astrbot_plugin_ceshi # 这是你的插件的唯一识别名。
 desc: 小碎bot测试中。 # 插件简短描述
-version: v1.2.0 # 每日基础运气联动版
+version: v1.3.0 # 购买方式入口与小碎表情包
 author: mookoo # 作者
 repo: https://github.com/mookoo15907/astrbot_plugin_ceshi # 插件的仓库地址
